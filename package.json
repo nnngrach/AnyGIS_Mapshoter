@@ -1,13 +1,13 @@
 {
-  "name": "node-js-getting-started",
-  "version": "0.3.0",
-  "description": "A sample Node.js app using Express 4",
+  "name": "Mapshoter",
+  "version": "0.0.1",
+  "description": "Get tile of online map vievers by taking a screenshot",
   "engines": {
     "node": "10.x"
   },
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node Controller/Main.js",
     "test": "node test.js"
   },
   "dependencies": {
