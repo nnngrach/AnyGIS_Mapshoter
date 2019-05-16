@@ -30,7 +30,12 @@ async function makeTile(url, x, y, z) {
 
     // Сгенерировать запрос для Оверпасса
     //const overpassCode = '(node(50.746,7.154,50.748,7.157););out;>;out skel qt;';
-    const overpassCode = '(node(50.746,7.154,50.748,7.157););out;>;out skel qt;'; 
+    var overpassCode = '(node({$0},{$1},{$2},{$3}););out;>;out skel qt;';
+    overpassCode = overpassCode.replace('{$0}', coordinates["bBox"]["latMin"]);
+    overpassCode = overpassCode.replace('{$1}', coordinates["bBox"]["lonMin"]);
+    overpassCode = overpassCode.replace('{$2}', coordinates["bBox"]["latMax"]);
+    overpassCode = overpassCode.replace('{$3}', coordinates["bBox"]["lonMax"]);
+    //console.log(overpassCode)
 
     // Вставить текст
     const searchSelector = '#search';
@@ -46,7 +51,7 @@ async function makeTile(url, x, y, z) {
     //await page.waitForSelector( '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1)' , { visible : true } );
 
 
-
+/*
     // Нажать на кнопку загрузки
 
     await page.evaluate(()=>document
@@ -57,7 +62,7 @@ async function makeTile(url, x, y, z) {
     // Дождаться, когда окно просмотра обновится
       await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg', { visible : true } );
       //await page.waitFor(1000);
-
+*/
 
     // Призумить
 
