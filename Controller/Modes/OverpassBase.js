@@ -37,6 +37,7 @@ async function makeTile(url, x, y, z) {
     overpassCode = overpassCode.replace('{$3}', coordinates["bBox"]["lonMax"]);
     //console.log(overpassCode)
 
+
     // Вставить текст
     const searchSelector = '#search';
     const codeEditorSelector = '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1) > textarea';
@@ -51,7 +52,7 @@ async function makeTile(url, x, y, z) {
     //await page.waitForSelector( '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1)' , { visible : true } );
 
 
-/*
+
     // Нажать на кнопку загрузки
 
     await page.evaluate(()=>document
@@ -62,7 +63,7 @@ async function makeTile(url, x, y, z) {
     // Дождаться, когда окно просмотра обновится
       await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg', { visible : true } );
       //await page.waitFor(1000);
-*/
+
 
     // Призумить
 
