@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const geoTools = require('../../ModelOfLogic/GeoTools');
 
 
 async function makeTile(url, x, y, z) {
@@ -19,12 +20,17 @@ async function makeTile(url, x, y, z) {
     //await page.goto(currentUrl);
     await page.goto(currentUrl, {waitUntil: 'networkidle2'});
 
+
+
     // Получить координаты краев и центра тайла
+    const coordinates = geoTools.getAllCoordinates(x, y, z);
+    //console.log(coordinates);
+
 
 
     // Сгенерировать запрос для Оверпасса
-    const overpassCode = '(node(50.746,7.154,50.748,7.157););out;>;out skel qt;';
-
+    //const overpassCode = '(node(50.746,7.154,50.748,7.157););out;>;out skel qt;';
+    const overpassCode = '(node(50.746,7.154,50.748,7.157););out;>;out skel qt;'; 
 
     // Вставить текст
     const searchSelector = '#search';
@@ -55,7 +61,7 @@ async function makeTile(url, x, y, z) {
 
     // Призумить
 
-    //await page.waitFor(100);
+
 
 
 

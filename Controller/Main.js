@@ -26,7 +26,8 @@ app.get('/text/:inputText', async (req, res, next) => {
 
 app.get('/api', async (req, res, next) => {
   //let screenshot = await generateScreenshot('https://google.com');
-  let screenshot = await worker.makeTile('https://google.com', 0, 0, 0);
+  //let screenshot = await worker.makeTile('https://google.com', 0, 0, 0);
+  let screenshot = await worker.makeTile('https://google.com', 68141, 44025, 17);
 
   let img = Buffer.from(screenshot, 'base64');
   res.writeHead(200, {
