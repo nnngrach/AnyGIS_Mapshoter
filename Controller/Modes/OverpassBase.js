@@ -11,7 +11,8 @@ async function makeTile(url, x, y, z) {
     });
 
 
-    const currentUrl = 'http://overpass-turbo.eu/s/IXl';
+    //const currentUrl = 'http://overpass-turbo.eu/s/IXl';
+    const currentUrl = 'http://overpass-turbo.eu/s/J4Q';
 
     // Загрузить страницу
     const page = await browser.newPage();
@@ -28,12 +29,15 @@ async function makeTile(url, x, y, z) {
     // Вставить текст
     const searchSelector = '#search';
     const codeEditorSelector = '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1) > textarea';
-    await page.type(codeEditorSelector, overpassCode+' //');
-    // await page.focus(searchSelector);
-    // await page.keyboard.type(text);
 
+    await page.focus( codeEditorSelector );
+    await page.keyboard.press( 'End' );
+    await page.keyboard.press( 'Backspace' );
+    await page.keyboard.press( 'Backspace' );
+    await page.keyboard.type( overpassCode );
 
-
+    await page.waitFor(100);
+    //await page.waitForSelector( '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1)' , { visible : true } );
 
 
 
@@ -44,8 +48,9 @@ async function makeTile(url, x, y, z) {
         .click()
       );
 
-    // Дождаться результатов и загрузить cookie
-      await page.waitForNavigation();
+    // Дождаться, когда окно просмотра обновится
+      await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg', { visible : true } );
+      //await page.waitFor(1000);
 
 
     // Призумить
