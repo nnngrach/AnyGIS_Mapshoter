@@ -19,15 +19,23 @@ express()
 
 const app = express()
 
-  app.get('/api', async (req, res, next) => {
-    let screenshot = await generateScreenshot('https://google.com');
-    let img = Buffer.from(screenshot, 'base64');
-    res.writeHead(200, {
-      'Content-Type': 'image/png',
-      'Content-Length': img.length
-    });
-    res.end(img);
+app.get('/', async (req, res, next) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/plain'
   });
+  res.end('Hello world');
+});
+
+
+app.get('/api', async (req, res, next) => {
+  let screenshot = await generateScreenshot('https://google.com');
+  let img = Buffer.from(screenshot, 'base64');
+  res.writeHead(200, {
+    'Content-Type': 'image/png',
+    'Content-Length': img.length
+  });
+  res.end(img);
+});
 
 
 app.listen(PORT, () => {
