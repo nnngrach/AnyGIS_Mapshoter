@@ -1,13 +1,13 @@
-const chrome = require('chrome-aws-lambda');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 
 
 async function makeTile(url, x, y, z) {
 
     const browser = await puppeteer.launch({
-        args: chrome.args,
-        executablePath: await chrome.executablePath,
-        headless: chrome.headless,
+      'args' : [
+          '--no-sandbox',
+          '--disable-setuid-sandbox'
+      ]
     });
 
 
