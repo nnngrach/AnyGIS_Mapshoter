@@ -5,7 +5,10 @@ const geoTools = require( '../../ModelOfLogic/GeoTools' )
 async function makeTile( url, x, y, z ) {
 
   //const currentUrl = 'http://overpass-turbo.eu/s/IXl';
-  const currentUrl = 'http://overpass-turbo.eu/s/J4Q'
+  //const currentUrl = 'http://overpass-turbo.eu/s/J4Q'
+  //grid
+  const currentUrl = 'http://overpass-turbo.eu/s/J8m'
+
 
   const searchFieldSelector = '#search'
   const searchPopUpMenuSelector = '#ui-id-1'
@@ -31,7 +34,7 @@ async function makeTile( url, x, y, z ) {
 
   // Загрузить страницу
   const page = await browser.newPage()
-  //await page.goto(currentUrl);
+  await page.setViewport({ width: 850, height: 400 })
   await page.goto( currentUrl, { waitUntil: 'networkidle2' } )
 
 
@@ -66,7 +69,6 @@ async function makeTile( url, x, y, z ) {
   if (z < defaultZoom) {
     const count = defaultZoom - z
     for (var i = 0; i < count; i++) {
-      console.log("click")
       await page.click( zoomMinusButtonSelector )
       await page.waitFor( 300 )
     }
@@ -89,6 +91,10 @@ async function makeTile( url, x, y, z ) {
   await page.keyboard.press( 'Backspace' )
   await page.keyboard.type( overpassCode )
 
+  await page.keyboard.type( '//Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' )
+  await page.keyboard.type( '//Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' )
+  await page.keyboard.type( '//Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' )
+
   await page.waitFor( 100 )
   //await page.waitForSelector( '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1)' , { visible : true } );
 
@@ -104,7 +110,7 @@ async function makeTile( url, x, y, z ) {
 
   // Дождаться, когда окно просмотра обновится
   await page.waitForSelector( mapViewSelector, { visible : true } )
-    //await page.waitFor(1000);
+  //await page.waitFor(1000);
 
 
 
@@ -114,20 +120,16 @@ async function makeTile( url, x, y, z ) {
 
 
   // Сделать кадрированный скриншот
+  const options = {
+    fullPage: false,
+    clip: {x: 489, y: 98, width: 256, height: 256}
+  }
 
-  const screenshot = await page.screenshot()
-
-  // const options = {
-  //   fullPage: false,
-  //   clip: {x: 300, y: 200, width: 500, height: 400}
-  // }
-
-  //const clip = {x: 300, y: 200, width: 500, height: 400};
-
-  //const file = await page.screenshot({ type,  quality, fullPage });
-  //const file = await page.screenshot({ type,  quality, fullPage, clip: clip });
+  const screenshot = await page.screenshot(options);
+  //const screenshot = await page.screenshot()
 
 
+  // Завершение
   await browser.close()
   return screenshot
 }

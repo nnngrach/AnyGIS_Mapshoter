@@ -22,9 +22,9 @@ app.get('/', async ( req, res, next ) => {
 
 
 app.get('/api', async ( req, res, next ) => {
-  //let screenshot = await worker.makeTile( 'https://google.com', 68141, 44025, 17 )
+  let screenshot = await worker.makeTile( 'https://google.com', 68141, 44025, 17 )
   //let screenshot = await worker.makeTile( 'https://google.com', 34070, 22012, 16 )
-  let screenshot = await worker.makeTile( 'https://google.com', 17034, 11007, 15 )
+  //let screenshot = await worker.makeTile( 'https://google.com', 17034, 11007, 15 )
 
   let img = Buffer.from( screenshot, 'base64' )
   res.writeHead( 200, {
