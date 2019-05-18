@@ -1,8 +1,8 @@
-const puppeteer = require('puppeteer')
-const geoTools = require('../../ModelOfLogic/GeoTools')
+const puppeteer = require( 'puppeteer' )
+const geoTools = require( '../../ModelOfLogic/GeoTools' )
 
 
-async function makeTile(url, x, y, z) {
+async function makeTile( url, x, y, z ) {
 
     const browser = await puppeteer.launch({
       'args' : [
@@ -18,12 +18,12 @@ async function makeTile(url, x, y, z) {
     // Загрузить страницу
     const page = await browser.newPage()
     //await page.goto(currentUrl);
-    await page.goto(currentUrl, {waitUntil: 'networkidle2'})
+    await page.goto( currentUrl, { waitUntil: 'networkidle2' } )
 
 
 
     // Получить координаты краев и центра тайла
-    const coordinates = geoTools.getAllCoordinates(x, y, z)
+    const coordinates = geoTools.getAllCoordinates( x, y, z )
     const bBox = `(${coordinates.bBox.latMin}, ${coordinates.bBox.lonMin}, ${coordinates.bBox.latMax}, ${coordinates.bBox.lonMax})`;
     const centerCoordinates = `${coordinates.center}, ${coordinates.center}`
     //console.log(coordinates);
@@ -33,15 +33,17 @@ async function makeTile(url, x, y, z) {
     // Сгенерировать запрос для Оверпасса
     //const overpassCode = '(node(50.746,7.154,50.748,7.157););out;>;out skel qt;';
     var overpassCode = '(node;);out;>;out skel qt;'
-    overpassCode = overpassCode.replace('node', 'node' + bBox)
-    overpassCode = overpassCode.replace('way', 'way' + bBox)
-    overpassCode = overpassCode.replace('rel', 'rel' + bBox)
+    overpassCode = overpassCode.replace( 'node', 'node' + bBox )
+    overpassCode = overpassCode.replace( 'way', 'way' + bBox )
+    overpassCode = overpassCode.replace( 'rel', 'rel' + bBox )
     //console.log(overpassCode)
 
 
     // Вставить текст
-    const searchSelector = '#search'
+    const searchFieldSelector = '#search'
     const codeEditorSelector = '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1) > textarea'
+    const runButtonSelector = '#navs > div > div.buttons > div:nth-child(1) > a:nth-child(1)'
+    const mapViewSelector = '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg'
 
     await page.focus( codeEditorSelector )
     await page.keyboard.press( 'End' )
@@ -49,20 +51,19 @@ async function makeTile(url, x, y, z) {
     await page.keyboard.press( 'Backspace' )
     await page.keyboard.type( overpassCode )
 
-    await page.waitFor(100)
+    await page.waitFor( 100 )
     //await page.waitForSelector( '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1)' , { visible : true } );
 
 
 
     // Нажать на кнопку загрузки
-
     await page.evaluate(()=>document
-        .querySelector('#navs > div > div.buttons > div:nth-child(1) > a:nth-child(1)')
+        .querySelector( runButtonSelector )
         .click()
       )
 
     // Дождаться, когда окно просмотра обновится
-      await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg', { visible : true } )
+      await page.waitForSelector( mapViewSelector, { visible : true } )
       //await page.waitFor(1000);
 
 
