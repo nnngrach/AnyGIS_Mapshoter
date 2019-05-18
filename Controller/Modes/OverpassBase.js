@@ -26,18 +26,14 @@ async function makeTile(url, x, y, z) {
     const coordinates = geoTools.getAllCoordinates(x, y, z);
     //console.log(coordinates);
 
-    const test = {a: '50.745'}
 
 
     // Сгенерировать запрос для Оверпасса
     //const overpassCode = '(node(50.746,7.154,50.748,7.157););out;>;out skel qt;';
-    //var overpassCode = '(node({$0},{$1},{$2},{$3}););out;>;out skel qt;';
-    // overpassCode = overpassCode.replace('{$0}', coordinates["bBox"]["latMin"]);
-    // overpassCode = overpassCode.replace('{$1}', coordinates["bBox"]["lonMin"]);
-    // overpassCode = overpassCode.replace('{$2}', coordinates["bBox"]["latMax"]);
-    // overpassCode = overpassCode.replace('{$3}', coordinates["bBox"]["lonMax"]);
-
-    const overpassCode = `(node(${coordinates.bBox.latMin},${coordinates.bBox.lonMin},${coordinates.bBox.latMax},${coordinates.bBox.lonMax}););out;>;out skel qt;`;
+    var overpassCode = '(node;);out;>;out skel qt;';
+    overpassCode = overpassCode.replace('node', 'node' + coordinates.bBox);
+    overpassCode = overpassCode.replace('way', 'way' + coordinates.bBox);
+    overpassCode = overpassCode.replace('rel', 'rel' + coordinates.bBox);
     //console.log(overpassCode)
 
 
