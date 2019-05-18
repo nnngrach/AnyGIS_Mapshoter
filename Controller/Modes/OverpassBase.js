@@ -1,5 +1,5 @@
-const puppeteer = require('puppeteer');
-const geoTools = require('../../ModelOfLogic/GeoTools');
+const puppeteer = require('puppeteer')
+const geoTools = require('../../ModelOfLogic/GeoTools')
 
 
 async function makeTile(url, x, y, z) {
@@ -9,45 +9,47 @@ async function makeTile(url, x, y, z) {
           '--no-sandbox',
           '--disable-setuid-sandbox'
       ]
-    });
+    })
 
 
     //const currentUrl = 'http://overpass-turbo.eu/s/IXl';
-    const currentUrl = 'http://overpass-turbo.eu/s/J4Q';
+    const currentUrl = 'http://overpass-turbo.eu/s/J4Q'
 
     // Загрузить страницу
-    const page = await browser.newPage();
+    const page = await browser.newPage()
     //await page.goto(currentUrl);
-    await page.goto(currentUrl, {waitUntil: 'networkidle2'});
+    await page.goto(currentUrl, {waitUntil: 'networkidle2'})
 
 
 
     // Получить координаты краев и центра тайла
-    const coordinates = geoTools.getAllCoordinates(x, y, z);
+    const coordinates = geoTools.getAllCoordinates(x, y, z)
+    const bBox = `(${coordinates.bBox.latMin}, ${coordinates.bBox.lonMin}, ${coordinates.bBox.latMax}, ${coordinates.bBox.lonMax})`;
+    const centerCoordinates = `${coordinates.center}, ${coordinates.center}`
     //console.log(coordinates);
 
 
 
     // Сгенерировать запрос для Оверпасса
     //const overpassCode = '(node(50.746,7.154,50.748,7.157););out;>;out skel qt;';
-    var overpassCode = '(node;);out;>;out skel qt;';
-    overpassCode = overpassCode.replace('node', 'node' + coordinates.bBox);
-    overpassCode = overpassCode.replace('way', 'way' + coordinates.bBox);
-    overpassCode = overpassCode.replace('rel', 'rel' + coordinates.bBox);
+    var overpassCode = '(node;);out;>;out skel qt;'
+    overpassCode = overpassCode.replace('node', 'node' + bBox)
+    overpassCode = overpassCode.replace('way', 'way' + bBox)
+    overpassCode = overpassCode.replace('rel', 'rel' + bBox)
     //console.log(overpassCode)
 
 
     // Вставить текст
-    const searchSelector = '#search';
-    const codeEditorSelector = '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1) > textarea';
+    const searchSelector = '#search'
+    const codeEditorSelector = '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1) > textarea'
 
-    await page.focus( codeEditorSelector );
-    await page.keyboard.press( 'End' );
-    await page.keyboard.press( 'Backspace' );
-    await page.keyboard.press( 'Backspace' );
-    await page.keyboard.type( overpassCode );
+    await page.focus( codeEditorSelector )
+    await page.keyboard.press( 'End' )
+    await page.keyboard.press( 'Backspace' )
+    await page.keyboard.press( 'Backspace' )
+    await page.keyboard.type( overpassCode )
 
-    await page.waitFor(100);
+    await page.waitFor(100)
     //await page.waitForSelector( '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1)' , { visible : true } );
 
 
@@ -57,10 +59,10 @@ async function makeTile(url, x, y, z) {
     await page.evaluate(()=>document
         .querySelector('#navs > div > div.buttons > div:nth-child(1) > a:nth-child(1)')
         .click()
-      );
+      )
 
     // Дождаться, когда окно просмотра обновится
-      await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg', { visible : true } );
+      await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg', { visible : true } )
       //await page.waitFor(1000);
 
 
@@ -72,7 +74,7 @@ async function makeTile(url, x, y, z) {
 
     // Сделать кадрированный скриншот
 
-    const screenshot = await page.screenshot();
+    const screenshot = await page.screenshot()
 
     // const options = {
     //   fullPage: false,
@@ -85,10 +87,10 @@ async function makeTile(url, x, y, z) {
     //const file = await page.screenshot({ type,  quality, fullPage, clip: clip });
 
 
-    await browser.close();
-    return screenshot;
+    await browser.close()
+    return screenshot
 }
 
 
 
-module.exports.makeTile = makeTile;
+module.exports.makeTile = makeTile
