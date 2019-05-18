@@ -2,13 +2,9 @@ const puppeteer = require( 'puppeteer' )
 const geoTools = require( '../../ModelOfLogic/GeoTools' )
 
 
-async function makeTile( url, x, y, z ) {
+async function makeTile( x, y, z ) {
 
-  //const currentUrl = 'http://overpass-turbo.eu/s/IXl';
-  //const currentUrl = 'http://overpass-turbo.eu/s/J4Q'
-  //grid
-  const currentUrl = 'http://overpass-turbo.eu/s/J8m'
-
+  const currentUrl = 'http://overpass-turbo.eu/s/J4Q'
 
   const searchFieldSelector = '#search'
   const searchPopUpMenuSelector = '#ui-id-1'
@@ -128,10 +124,11 @@ async function makeTile( url, x, y, z ) {
   const screenshot = await page.screenshot(options);
   //const screenshot = await page.screenshot()
 
+  let imgageBuffer = Buffer.from( screenshot, 'base64' )
 
   // Завершение
   await browser.close()
-  return screenshot
+  return imgageBuffer
 }
 
 
