@@ -23,6 +23,9 @@ app.get('/', async ( req, res, next ) => {
 
 app.get('/:mode/:x/:y/:z', async ( req, res, next ) => {
 
+  console.log('==============================')
+  console.log(new Date().getTime() / 1000, ' - R app get')
+
   if (!isInt(req.params.x)) return next(error(400, 'X must must be Intager'))
   if (!isInt(req.params.y)) return next(error(400, 'Y must must be Intager'))
   if (!isInt(req.params.z)) return next(error(400, 'Z must must be Intager'))
@@ -32,6 +35,7 @@ app.get('/:mode/:x/:y/:z', async ( req, res, next ) => {
     case 'overpass':
 
       const script = req.query.script
+
       if (!script) return next(error(400, 'No script paramerer'))
 
       const screenshot = await worker.makeTile( Number(req.params.x), Number(req.params.y), Number(req.params.z) )
@@ -40,10 +44,15 @@ app.get('/:mode/:x/:y/:z', async ( req, res, next ) => {
         'Content-Type': 'image/png',
         'Content-Length': screenshot.length
       })
+
+        console.log(new Date().getTime() / 1000, ' - R res end')
       res.end( screenshot )
+
       break
 
+
     default:
+
       return next(error(400, 'Unknown mode value'))
   }
 
