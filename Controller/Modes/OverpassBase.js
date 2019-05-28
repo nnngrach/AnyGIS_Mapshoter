@@ -4,6 +4,7 @@ const geoTools = require( '../../ModelOfLogic/GeoTools' )
 
 async function makeTile( x, y, z, scriptName ) {
 
+  // Константы
   const searchFieldSelector = '#search'
   const searchPopUpMenuSelector = '#ui-id-1'
   const zoomPlusButtonSelector = '#map > div.leaflet-control-container > div.leaflet-top.leaflet-left > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-in'
@@ -39,7 +40,7 @@ async function makeTile( x, y, z, scriptName ) {
   await page.keyboard.type( centerCoordinates )
 
 
-  // Дождемся, пока появится всплывающее меню и кликнем на первый предложенный адрес
+  // Дождаться, пока появится всплывающее меню и кликнем на первый предложенный адрес
   await page.waitForSelector( searchPopUpMenuSelector , { visible : true } )
   await page.keyboard.press( 'Enter' )
   await page.waitFor( 1000 )
@@ -68,7 +69,7 @@ async function makeTile( x, y, z, scriptName ) {
 
 
 
-  // Вставляем нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
+  // Вставить нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
   await page.focus( codeEditorSelector )
   await page.keyboard.type( bBox + ' //' )
   await page.waitFor( 100 )
@@ -92,12 +93,12 @@ async function makeTile( x, y, z, scriptName ) {
 
   //const screenshot = await page.screenshot()
   const screenshot = await page.screenshot(options);
-  let imgageBuffer = Buffer.from( screenshot, 'base64' )
+  let imageBufferData = Buffer.from( screenshot, 'base64' )
 
 
   // Завершение работы
   await browser.close()
-  return imgageBuffer
+  return imageBufferData
 }
 
 
