@@ -28,77 +28,83 @@ async function makeTile( x, y, z, scriptName ) {
 
   const browser = await puppeteer.launch(herokuDeploymentParams)
   const page = await browser.newPage()
-  await page.setViewport({ width: 850, height: 400 })
-
-  // Загрузить требуемую веб страницу
-  await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 5000000} )
-  //console.log(new Date().getTime() / 1000, ' - P goto page')
+  await page.setViewport( { width: 850, height: 400 } )
 
 
-  // Чтобы показать на экране запрашиваемую область, введем в окошко поиска координаты ее центра
-  await page.focus( searchFieldSelector )
-  await page.keyboard.type( centerCoordinates )
+  try {
+    // Загрузить требуемую веб страницу
+    await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 5000000} )
 
 
-  // Дождаться, пока появится всплывающее меню и кликнем на первый предложенный адрес
-  await page.waitForSelector( searchPopUpMenuSelector , { visible : true } )
-  await page.keyboard.press( 'Enter' )
-  await page.waitFor( 1000 )
+    // Чтобы показать на экране запрашиваемую область, введем в окошко поиска координаты ее центра
+    await page.focus( searchFieldSelector )
+    await page.keyboard.type( centerCoordinates )
+
+
+    // Дождаться, пока появится всплывающее меню и кликнем на первый предложенный адрес
+    await page.waitForSelector( searchPopUpMenuSelector , { visible : true } )
+    await page.keyboard.press( 'Enter' )
+    await page.waitFor( 1000 )
 
 
 
-  // После каждого поиска уровень зума сбрасывается на 18
-  const zoomLevelAfterSearch = 18
+    // После каждого поиска уровень зума сбрасывается на 18
+    const zoomLevelAfterSearch = 18
 
 
-  // Теперь можно приблизить или отдалить карту, если это требуется
-  if (z < zoomLevelAfterSearch) {
-    const count = zoomLevelAfterSearch - z
-    for (var i = 0; i < count; i++) {
-      await page.click( zoomMinusButtonSelector )
-      await page.waitFor( 300 )
+    // Теперь можно приблизить или отдалить карту, если это требуется
+    if ( z < zoomLevelAfterSearch ) {
+      const count = zoomLevelAfterSearch - z
+      for ( var i = 0; i < count; i++ ) {
+        await page.click( zoomMinusButtonSelector )
+        await page.waitFor( 300 )
+      }
+
+    } else if ( z > zoomLevelAfterSearch ) {
+      const count = z - zoomLevelAfterSearch
+      for ( var i = 0; i < count; i++ ) {
+        await page.click( zoomPlusButtonSelector )
+        await page.waitFor( 300 )
+      }
     }
 
-  } else if (z > zoomLevelAfterSearch) {
-    const count = z - zoomLevelAfterSearch
-    for (var i = 0; i < count; i++) {
-      await page.click( zoomPlusButtonSelector )
-      await page.waitFor( 300 )
+
+
+    // Вставить нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
+    await page.focus( codeEditorSelector )
+    await page.keyboard.type( bBox + ' //' )
+    await page.waitFor( 100 )
+
+
+
+
+    // Нажать на кнопку загрузки гео-данных
+    await page.click( runButtonSelector )
+
+    // Дождаться, когда окно просмотра карты обновится
+    await page.waitForSelector( mapViewSelector, { visible : true, timeout: 5000000  } )
+
+
+
+    // Сделать кадрированный скриншот
+    const options = {
+      fullPage: false,
+      clip: {x: 489, y: 98, width: 256, height: 256}
     }
+
+    //const screenshot = await page.screenshot()
+    const screenshot = await page.screenshot( options )
+    let imageBufferData = Buffer.from( screenshot, 'base64' )
+
+
+    // Завершение работы
+    await browser.close()
+    return imageBufferData
+
+  } catch ( error ) {
+    throw new Error( error.message )
   }
 
-
-
-  // Вставить нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
-  await page.focus( codeEditorSelector )
-  await page.keyboard.type( bBox + ' //' )
-  await page.waitFor( 100 )
-
-
-
-
-  // Нажать на кнопку загрузки гео-данных
-  await page.click( runButtonSelector )
-
-  // Дождаться, когда окно просмотра карты обновится
-  await page.waitForSelector( mapViewSelector, { visible : true, timeout: 5000000  } )
-
-
-
-  // Сделать кадрированный скриншот
-  const options = {
-    fullPage: false,
-    clip: {x: 489, y: 98, width: 256, height: 256}
-  }
-
-  //const screenshot = await page.screenshot()
-  const screenshot = await page.screenshot(options);
-  let imageBufferData = Buffer.from( screenshot, 'base64' )
-
-
-  // Завершение работы
-  await browser.close()
-  return imageBufferData
 }
 
 

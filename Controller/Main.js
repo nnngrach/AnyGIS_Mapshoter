@@ -12,7 +12,7 @@ app.listen( PORT, () => {
 })
 
 
-app.get('/', async ( req, res, next ) => {
+app.get( '/', async ( req, res, next ) => {
   res.writeHead( 200, {
     'Content-Type': 'text/plain'
   })
@@ -21,53 +21,60 @@ app.get('/', async ( req, res, next ) => {
 
 
 
-app.get('/:mode/:x/:y/:z', async ( req, res, next ) => {
+app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
-  console.log('==============================')
-  console.log(new Date().getTime() / 1000, ' - R app get')
+  //console.log('==============================')
+  //console.log(new Date().getTime() / 1000, ' - R app get')
 
-  if (!isInt(req.params.x)) return next(error(400, 'X must must be Intager'))
-  if (!isInt(req.params.y)) return next(error(400, 'Y must must be Intager'))
-  if (!isInt(req.params.z)) return next(error(400, 'Z must must be Intager'))
+  if ( !isInt( req.params.x )) return next( error( 400, 'X must must be Intager' ))
+  if ( !isInt( req.params.y )) return next( error( 400, 'Y must must be Intager' ))
+  if ( !isInt( req.params.z )) return next( error( 400, 'Z must must be Intager' ))
 
-  switch (req.params.mode) {
+
+  switch ( req.params.mode ) {
 
     case 'overpass':
 
       const scriptName = req.query.script
+      if ( !scriptName ) return next( error( 400, 'No script paramerer' ) )
 
-      if (!scriptName) return next(error(400, 'No script paramerer'))
+      try {
 
-      const screenshot = await worker.makeTile( Number(req.params.x), Number(req.params.y), Number(req.params.z), scriptName )
+          const screenshot = await worker.makeTile( Number( req.params.x ),
+                                                    Number( req.params.y ),
+                                                    Number( req.params.z ),
+                                                    scriptName )
 
-      res.writeHead( 200, {
-        'Content-Type': 'image/png',
-        'Content-Length': screenshot.length
-      })
+          res.writeHead( 200, {
+            'Content-Type': 'image/png',
+            'Content-Length': screenshot.length
+          })
 
-        console.log(new Date().getTime() / 1000, ' - R res end')
-      res.end( screenshot )
+          res.end( screenshot )
+
+      } catch ( errorMessage ) {
+          return next( errorMessage )
+      }
 
       break
 
 
     default:
-
-      return next(error(400, 'Unknown mode value'))
+      return next( error( 400, 'Unknown mode value' ) )
   }
 
 })
 
 
 
-function isInt(value) {
-  var x = parseFloat(value);
-  return !isNaN(value) && (x | 0) === x;
+function isInt( value ) {
+  var x = parseFloat( value )
+  return !isNaN( value ) && ( x | 0 ) === x
 }
 
 
-function error(status, msg) {
-  var err = new Error(msg);
-  err.status = status;
-  return err;
+function error( status, msg ) {
+  var err = new Error( msg )
+  err.status = status
+  return err
 }
