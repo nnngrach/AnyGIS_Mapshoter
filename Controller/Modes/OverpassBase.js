@@ -2,12 +2,7 @@ const puppeteer = require( 'puppeteer' )
 const geoTools = require( '../../ModelOfLogic/GeoTools' )
 
 
-async function makeTile( x, y, z ) {
-
-    console.log(new Date().getTime() / 1000, ' - start MakeTile func')
-
-  const currentUrl = 'http://overpass-turbo.eu/s/Jph' // for test bbox
-  const defaultZoom = 18
+async function makeTile( x, y, z, scriptName ) {
 
   const searchFieldSelector = '#search'
   const searchPopUpMenuSelector = '#ui-id-1'
@@ -19,90 +14,52 @@ async function makeTile( x, y, z ) {
 
 
 
-
-  const browser = await puppeteer.launch({
-    'args' : [
-        '--no-sandbox',
-        '--disable-setuid-sandbox'
-    ]
-  })
-
-    console.log(new Date().getTime() / 1000, ' - P make browser')
-
-
-
-
-  // Загрузить страницу
-  const page = await browser.newPage()
-  await page.setViewport({ width: 850, height: 400 })
-  await page.goto( currentUrl, { waitUntil: 'networkidle2',
-                                timeout: 5000000} )
-
-
-    console.log(new Date().getTime() / 1000, ' - P goto page')
-
-
-
-
-  // Получить координаты краев и центра тайла
+  // Рассчитать координаты краев и центра области для загрузки (тайла)
   const coordinates = geoTools.getAllCoordinates( x, y, z )
   const bBox = `[bbox:${coordinates.bBox.latMin}, ${coordinates.bBox.lonMin}, ${coordinates.bBox.latMax}, ${coordinates.bBox.lonMax}];`;
   const centerCoordinates = `${coordinates.center.lat} ${coordinates.center.lon}`
 
-    console.log(new Date().getTime() / 1000, ' - P get coordinates')
 
 
+  // Запустить и настроить браузер
+  const pageUrl = 'http://overpass-turbo.eu/' + scriptName
+  const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
+
+  const browser = await puppeteer.launch(herokuDeploymentParams)
+  const page = await browser.newPage()
+  await page.setViewport({ width: 850, height: 400 })
+
+  // Загрузить требуемую веб страницу
+  await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 5000000} )
+  //console.log(new Date().getTime() / 1000, ' - P goto page')
 
 
-
-
-
-
-
-  //Призумиться на центр искомого тайла
-  console.log(new Date().getTime() / 1000, ' - S focus search field')
+  // Чтобы показать на экране запрашиваемую область, введем в окошко поиска координаты ее центра
   await page.focus( searchFieldSelector )
   await page.keyboard.type( centerCoordinates )
 
-  console.log(new Date().getTime() / 1000, ' - S typing')
 
-
-
-
-
-
-
-
-  //await page.waitFor( 1000 )
-  await page.waitForSelector( searchPopUpMenuSelector , { visible : true } );
-    console.log(new Date().getTime() / 1000, ' - S wait for popup menu')
+  // Дождемся, пока появится всплывающее меню и кликнем на первый предложенный адрес
+  await page.waitForSelector( searchPopUpMenuSelector , { visible : true } )
   await page.keyboard.press( 'Enter' )
-    console.log(new Date().getTime() / 1000, ' - S press enter')
-
-  //await page.waitFor( 1000 )
-  //await page.waitForSelector( mapViewSelector, { visible : true } )
-  page.waitForNavigation
-    console.log(new Date().getTime() / 1000, ' - S wait 1000')
+  await page.waitFor( 1000 )
 
 
 
+  // После каждого поиска уровень зума сбрасывается на 18
+  const zoomLevelAfterSearch = 18
 
 
-  //Подогнать под запрашиваемый зум
-  if (z < defaultZoom) {
-    const count = defaultZoom - z
-
-    //await input.click({ clickCount: 3 })
-
+  // Теперь можно приблизить или отдалить карту, если это требуется
+  if (z < zoomLevelAfterSearch) {
+    const count = zoomLevelAfterSearch - z
     for (var i = 0; i < count; i++) {
       await page.click( zoomMinusButtonSelector )
-        console.log(new Date().getTime() / 1000, ' - Z zomm click')
       await page.waitFor( 300 )
-        console.log(new Date().getTime() / 1000, ' - Z zoom wait 300')
     }
 
-  } else if (z > defaultZoom) {
-    const count = z - defaultZoom
+  } else if (z > zoomLevelAfterSearch) {
+    const count = z - zoomLevelAfterSearch
     for (var i = 0; i < count; i++) {
       await page.click( zoomPlusButtonSelector )
       await page.waitFor( 300 )
@@ -111,42 +68,19 @@ async function makeTile( x, y, z ) {
 
 
 
-
-
-
-
-  // Вставить текст и дождаться, когда IDE распознает синтаксис
-
+  // Вставляем нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
   await page.focus( codeEditorSelector )
   await page.keyboard.type( bBox + ' //' )
-    console.log(new Date().getTime() / 1000, ' - E typing')
   await page.waitFor( 100 )
-    console.log(new Date().getTime() / 1000, ' - E wait 100')
 
 
 
 
-
-
-
-  // Нажать на кнопку загрузки
+  // Нажать на кнопку загрузки гео-данных
   await page.click( runButtonSelector )
 
-    console.log(new Date().getTime() / 1000, ' - E click Run')
-
-
-
-  // Дождаться, когда окно просмотра обновится
-  //await page.waitForSelector( mapViewSelector, { visible : true } )
-  //
-  await page.waitForSelector( mapViewSelector, { visible : true,
-                                                  timeout: 5000000  } )
-  //await page.waitFor(1000);
-
-    console.log(new Date().getTime() / 1000, ' - E wait map viewer')
-
-
-
+  // Дождаться, когда окно просмотра карты обновится
+  await page.waitForSelector( mapViewSelector, { visible : true, timeout: 5000000  } )
 
 
 
@@ -156,16 +90,12 @@ async function makeTile( x, y, z ) {
     clip: {x: 489, y: 98, width: 256, height: 256}
   }
 
-  const screenshot = await page.screenshot(options);
   //const screenshot = await page.screenshot()
-
-    console.log(new Date().getTime() / 1000, ' - I screenshot')
-
+  const screenshot = await page.screenshot(options);
   let imgageBuffer = Buffer.from( screenshot, 'base64' )
 
-    console.log(new Date().getTime() / 1000, ' - I convert to buffer')
 
-  // Завершение
+  // Завершение работы
   await browser.close()
   return imgageBuffer
 }

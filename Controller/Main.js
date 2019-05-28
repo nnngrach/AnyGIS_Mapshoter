@@ -34,11 +34,11 @@ app.get('/:mode/:x/:y/:z', async ( req, res, next ) => {
 
     case 'overpass':
 
-      const script = req.query.script
+      const scriptName = req.query.script
 
-      if (!script) return next(error(400, 'No script paramerer'))
+      if (!scriptName) return next(error(400, 'No script paramerer'))
 
-      const screenshot = await worker.makeTile( Number(req.params.x), Number(req.params.y), Number(req.params.z) )
+      const screenshot = await worker.makeTile( Number(req.params.x), Number(req.params.y), Number(req.params.z), scriptName )
 
       res.writeHead( 200, {
         'Content-Type': 'image/png',
