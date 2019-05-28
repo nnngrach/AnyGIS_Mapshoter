@@ -20,6 +20,7 @@ async function makeTile( x, y, z, scriptName ) {
   const bBox = `[bbox:${coordinates.bBox.latMin}, ${coordinates.bBox.lonMin}, ${coordinates.bBox.latMax}, ${coordinates.bBox.lonMax}];`;
   const centerCoordinates = `${coordinates.center.lat} ${coordinates.center.lon}`
 
+  console.log(coordinates.bBox)
 
 
   // Запустить и настроить браузер
@@ -28,10 +29,13 @@ async function makeTile( x, y, z, scriptName ) {
 
   const browser = await puppeteer.launch(herokuDeploymentParams)
   const page = await browser.newPage()
-  await page.setViewport( { width: 850, height: 400 } )
+  await page.setViewport( { width: 850, height: 450 } )
 
 
   try {
+
+    //await page.waitFor( 1000 )
+
     // Загрузить требуемую веб страницу
     await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 5000000} )
 
@@ -82,14 +86,18 @@ async function makeTile( x, y, z, scriptName ) {
     await page.click( runButtonSelector )
 
     // Дождаться, когда окно просмотра карты обновится
-    await page.waitForSelector( mapViewSelector, { visible : true, timeout: 5000000  } )
+    try {
+      await page.waitForSelector( '#map_blank', { visible : true, timeout: 1000  } )
+    } catch {
+      await page.waitForSelector( mapViewSelector, { visible : true, timeout: 60000  } )
+    }
 
 
 
     // Сделать кадрированный скриншот
     const options = {
       fullPage: false,
-      clip: {x: 489, y: 98, width: 256, height: 256}
+      clip: {x: 489, y: 123, width: 256, height: 256}
     }
 
     //const screenshot = await page.screenshot()
@@ -101,10 +109,11 @@ async function makeTile( x, y, z, scriptName ) {
     await browser.close()
     return imageBufferData
 
+
+
   } catch ( error ) {
     throw new Error( error.message )
   }
-
 }
 
 

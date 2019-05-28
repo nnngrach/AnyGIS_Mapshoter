@@ -53,6 +53,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
           res.end( screenshot )
 
       } catch ( errorMessage ) {
+          console.log( errorMessage )
           return next( errorMessage )
       }
 
