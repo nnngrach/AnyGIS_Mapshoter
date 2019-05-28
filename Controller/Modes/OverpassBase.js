@@ -138,7 +138,7 @@ async function makeTile( x, y, z ) {
 
   // Дождаться, когда окно просмотра обновится
   //await page.waitForSelector( mapViewSelector, { visible : true } )
-  
+  //
   await page.waitForSelector( mapViewSelector, { visible : true,
                                                   timeout: 5000000  } )
   //await page.waitFor(1000);
