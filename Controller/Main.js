@@ -37,6 +37,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
       const scriptName = req.query.script
       if ( !scriptName ) return next( error( 400, 'No script paramerer' ) )
+      if ( Number( req.params.z ) < 15 ) return next( error( 400, 'Zoom level < 15' ) )
 
       try {
 
