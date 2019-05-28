@@ -35,7 +35,8 @@ async function makeTile( x, y, z ) {
   // Загрузить страницу
   const page = await browser.newPage()
   await page.setViewport({ width: 850, height: 400 })
-  await page.goto( currentUrl, { waitUntil: 'networkidle2' } )
+  await page.goto( currentUrl, { waitUntil: 'networkidle2',
+                                timeout: 5000000} )
 
 
     console.log(new Date().getTime() / 1000, ' - P goto page')
@@ -136,7 +137,9 @@ async function makeTile( x, y, z ) {
 
 
   // Дождаться, когда окно просмотра обновится
-  await page.waitForSelector( mapViewSelector, { visible : true } )
+  //await page.waitForSelector( mapViewSelector, { visible : true } )
+  await page.waitForSelector( mapViewSelector, { visible : true,
+                                                  timeout: 5000000  } )
   //await page.waitFor(1000);
 
     console.log(new Date().getTime() / 1000, ' - E wait map viewer')
