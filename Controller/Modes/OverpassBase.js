@@ -20,8 +20,6 @@ async function makeTile( x, y, z, scriptName ) {
   const bBox = `[bbox:${coordinates.bBox.latMin}, ${coordinates.bBox.lonMin}, ${coordinates.bBox.latMax}, ${coordinates.bBox.lonMax}];`;
   const centerCoordinates = `${coordinates.center.lat} ${coordinates.center.lon}`
 
-  console.log(coordinates.bBox)
-
 
   // Запустить и настроить браузер
   const pageUrl = 'http://overpass-turbo.eu/' + scriptName
