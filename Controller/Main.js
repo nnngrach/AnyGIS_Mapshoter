@@ -23,7 +23,7 @@ app.get( '/', async ( req, res, next ) => {
 
 app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
-  //console.log('==============================')
+  console.log('==============================')
   //console.log(new Date().getTime() / 1000, ' - R app get')
 
   if ( !isInt( req.params.x )) return next( error( 400, 'X must must be Intager' ))
@@ -51,6 +51,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
             'Content-Length': screenshot.length
           })
 
+          console.log( req.params.x, req.params.y, req.params.z )
           res.end( screenshot )
 
       } catch ( errorMessage ) {

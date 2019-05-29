@@ -18,8 +18,8 @@ async function makeTile( x, y, z, scriptName ) {
   // Рассчитать координаты краев и центра области для загрузки (тайла)
   const coordinates = geoTools.getAllCoordinates( x, y, z )
   const bBox = `[bbox:${coordinates.bBox.latMin}, ${coordinates.bBox.lonMin}, ${coordinates.bBox.latMax}, ${coordinates.bBox.lonMax}];`;
-  const centerCoordinates = `${coordinates.center.lat} ${coordinates.center.lon}`
-
+  //const centerCoordinates = `${coordinates.center.lat} ${coordinates.center.lon}`
+  const centerCoordinates = `${coordinates.center.lat};${coordinates.center.lon};${z}`
 
   // Запустить и настроить браузер
   const pageUrl = 'http://overpass-turbo.eu/' + scriptName
@@ -34,22 +34,28 @@ async function makeTile( x, y, z, scriptName ) {
 
     //await page.waitFor( 1000 )
 
+
+    // Призумить к нужному месту
+    await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2'} )
+
     // Загрузить требуемую веб страницу
-    await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 5000000} )
+    await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 5000000} )
 
 
+
+    /*
     // Чтобы показать на экране запрашиваемую область, введем в окошко поиска координаты ее центра
     await page.focus( searchFieldSelector )
     await page.keyboard.type( centerCoordinates )
 
 
     // Дождаться, пока появится всплывающее меню и кликнем на первый предложенный адрес
-    await page.waitForSelector( searchPopUpMenuSelector , { visible : true } )
+    await page.waitForSelector( searchPopUpMenuSelector , { visible : true, timeout: 50000 } )
     await page.keyboard.press( 'Enter' )
     await page.waitFor( 1000 )
+    */
 
-
-
+    /*
     // После каждого поиска уровень зума сбрасывается на 18
     const zoomLevelAfterSearch = 18
 
@@ -60,6 +66,8 @@ async function makeTile( x, y, z, scriptName ) {
       for ( var i = 0; i < count; i++ ) {
         await page.click( zoomMinusButtonSelector )
         await page.waitFor( 300 )
+        //await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-tile-pane > div > div.leaflet-tile-container.leaflet-zoom-animated > img:nth-child(1)' )
+        //await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-tile-pane > div > div:nth-child(2)' )
       }
 
     } else if ( z > zoomLevelAfterSearch ) {
@@ -69,6 +77,24 @@ async function makeTile( x, y, z, scriptName ) {
         await page.waitFor( 300 )
       }
     }
+    */
+
+
+    // Оригинал - дождаться загрузки всех картинок
+    // await page.evaluate(async () => {
+    // const selectors = Array.from(document.querySelectorAll("img"));
+    // await Promise.all(selectors.map(img => {
+    //   if (img.complete) return;
+    //   return new Promise((resolve, reject) => {
+    //     img.addEventListener('load', resolve);
+    //     img.addEventListener('error', reject);
+    //     });
+    //   }));
+    // })
+
+
+
+
 
 
 
@@ -87,8 +113,10 @@ async function makeTile( x, y, z, scriptName ) {
     try {
       await page.waitForSelector( '#map_blank', { visible : true, timeout: 1000  } )
     } catch {
-      await page.waitForSelector( mapViewSelector, { visible : true, timeout: 60000  } )
+      await page.waitForSelector( mapViewSelector, { visible : true, timeout: 1200000  } )
+      //await page.waitForSelector( 'body')
     }
+
 
 
 
