@@ -36,7 +36,7 @@ async function makeTile( x, y, z, scriptName ) {
 
 
     // Призумить к нужному месту
-    await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 5000001} )
+    //await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 5000001} )
 
     // Загрузить требуемую веб страницу
     await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 5000002} )
