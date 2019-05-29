@@ -36,10 +36,10 @@ async function makeTile( x, y, z, scriptName ) {
 
 
     // Призумить к нужному месту
-    //await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 5000001} )
+    await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 5000001} )
 
     // Загрузить требуемую веб страницу
-    await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 5000002} )
+    //await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 5000002} )
 
 
 
@@ -93,9 +93,9 @@ async function makeTile( x, y, z, scriptName ) {
     // })
 
 
+//=================================
 
-
-
+/*
 
 
     // Вставить нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
@@ -117,7 +117,7 @@ async function makeTile( x, y, z, scriptName ) {
       //await page.waitForSelector( 'body')
     }
 
-
+*/
 
 
     // Сделать кадрированный скриншот
