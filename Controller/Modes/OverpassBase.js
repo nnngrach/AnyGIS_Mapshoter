@@ -12,7 +12,7 @@ async function makeTile( x, y, z, scriptName ) {
   const runButtonSelector = '#navs > div > div.buttons > div:nth-child(1) > a:nth-child(1)'
   const codeEditorSelector = '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1) > textarea'
   const mapViewSelector = '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg'
-
+  const mapIsEmptyMessageSelector = '#map_blank'
 
 
   // Рассчитать координаты краев и центра области для загрузки (тайла)
@@ -36,10 +36,10 @@ async function makeTile( x, y, z, scriptName ) {
 
 
     // Призумить к нужному месту
-    await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2'} )
+    await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 5000001} )
 
     // Загрузить требуемую веб страницу
-    await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 5000000} )
+    await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 5000002} )
 
 
 
@@ -111,7 +111,7 @@ async function makeTile( x, y, z, scriptName ) {
 
     // Дождаться, когда окно просмотра карты обновится
     try {
-      await page.waitForSelector( '#map_blank', { visible : true, timeout: 1000  } )
+      await page.waitForSelector( mapIsEmptyMessageSelector, { visible : true, timeout: 1000  } )
     } catch {
       await page.waitForSelector( mapViewSelector, { visible : true, timeout: 1200000  } )
       //await page.waitForSelector( 'body')
