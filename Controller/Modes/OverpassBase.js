@@ -95,7 +95,7 @@ async function makeTile( x, y, z, scriptName ) {
 
 //=================================
 
-/*
+
 
 
     // Вставить нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
@@ -117,7 +117,9 @@ async function makeTile( x, y, z, scriptName ) {
       //await page.waitForSelector( 'body')
     }
 
-*/
+
+
+
 
 
     // Сделать кадрированный скриншот
