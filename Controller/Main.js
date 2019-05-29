@@ -1,11 +1,15 @@
 const puppeteer = require( 'puppeteer' )
 const express = require( 'express' )
 const path = require( 'path' )
+var timeout = require('connect-timeout')
+
 
 const worker = require( './Modes/OverpassBase' )
 
 const PORT = process.env.PORT || 5000
 const app = express()
+app.use(timeout('29s'))
+
 
 app.listen( PORT, () => {
   console.log( 'Listening on port ', PORT )
@@ -18,6 +22,14 @@ app.get( '/', async ( req, res, next ) => {
   })
   res.end( 'Puppeteer utility for AnyGIS' )
 })
+
+
+
+//Redirecter
+
+//30s timeout exit
+
+
 
 
 
