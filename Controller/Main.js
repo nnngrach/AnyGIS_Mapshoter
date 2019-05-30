@@ -25,14 +25,24 @@ app.get( '/', async ( req, res, next ) => {
 
 
 
-//Redirecter
+// Для перенаправления на одно из свободных зеркал
+app.get( '/:x/:y/:z', async ( req, res, next ) => {
 
-//30s timeout exit
+  if ( !req.params.x ) return next( error( 400, 'No X paramerer' ))
+  if ( !req.params.y ) return next( error( 400, 'No Y paramerer' ))
+  if ( !req.params.z ) return next( error( 400, 'No Z paramerer' ))
+  if ( !req.query.script ) return next( error( 400, 'No script paramerer' ) )
+
+  const randomValue = randomInt( 1, 10 )
+  //console.log(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
+  res.redirect(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
+})
 
 
 
 
 
+// Для непосредственной загрузки тайла
 app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
   console.log('==============================')
@@ -92,4 +102,8 @@ function error( status, msg ) {
   var err = new Error( msg )
   err.status = status
   return err
+}
+
+function randomInt(low, high) {
+  return Math.floor(Math.random() * (high - low) + low)
 }
