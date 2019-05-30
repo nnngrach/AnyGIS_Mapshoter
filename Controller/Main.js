@@ -11,6 +11,7 @@ const app = express()
 app.use(timeout('29s'))
 
 
+
 app.listen( PORT, () => {
   console.log( 'Listening on port ', PORT )
 })
@@ -33,7 +34,7 @@ app.get( '/:x/:y/:z', async ( req, res, next ) => {
   if ( !req.params.z ) return next( error( 400, 'No Z paramerer' ))
   if ( !req.query.script ) return next( error( 400, 'No script paramerer' ) )
 
-  const randomValue = randomInt( 1, 10 )
+  const randomValue = randomInt( 1, 19 )
   //console.log(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
   res.redirect(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
 })
