@@ -29,7 +29,8 @@ app.get( '/:x/:y/:z', async ( req, res, next ) => {
   if ( !req.params.z ) return next( error( 400, 'No Z paramerer' ))
   if ( !req.query.script ) return next( error( 400, 'No script paramerer' ) )
 
-  const randomValue = randomInt( 1, 31 )
+  //const randomValue = randomInt( 1, 31 )
+  const randomValue = randomInt( 1, 5 )
   res.redirect(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
   console.log(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
   })
