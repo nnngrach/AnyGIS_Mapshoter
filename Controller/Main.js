@@ -1,7 +1,7 @@
 const puppeteer = require( 'puppeteer' )
 const express = require( 'express' )
 const path = require( 'path' )
-const worker = require( './Modes/OverpassBase' )
+
 
 const PORT = process.env.PORT || 5000
 const app = express()
@@ -20,7 +20,8 @@ app.get( '/', async ( req, res, next ) => {
 })
 
 
-// Для перенаправления на одно из свободных зеркал
+
+// Для перенаправления пользователя на одно из свободных зеркал
 app.get( '/:x/:y/:z', async ( req, res, next ) => {
 
   if ( !req.params.x ) return next( error( 400, 'No X paramerer' ))
@@ -50,15 +51,13 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
   if ( !isInt( z )) return next( error( 400, 'Z must must be Intager' ))
 
 
-  // Чтобы избежать ошибки "С вашего IP поступает слишком много запросов"
-  // Сделаем, чтобы запросы запускались в разное время
-  const randomValue = randomInt( 200, 1000 )
-  await wait(randomValue)
-
-
+  // Выбираем режим обработки карты
   switch ( req.params.mode ) {
 
+    // API для растеризации карты с сайта OverpassTurbo.eu
     case 'overpass':
+
+      const worker = require( './Modes/OverpassBase' )
 
       const scriptName = req.query.script
       if ( !scriptName ) return next( error( 400, 'No script paramerer' ) )
@@ -70,20 +69,23 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
       }
 
 
+      // Делать все новые и новые попытки, пока тайл не загрузится
       var screenshot
+      var isSucces = false
 
-      try {
-        screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName )
-
-      // Если что-то заглючило, то попробовать еще один раз
-      } catch ( errorMessage ) {
-
-        console.log( new Date().getTime() / 1000,  x, y, z, errorMessage)
-        await wait(1000)
-        screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName )
+      while (!isSucces) {
+        try {
+          console.log( new Date().getTime() / 1000, 'try',  x, y, z,)
+          screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName )
+          isSucces = true
+        } catch (errorMessage) {
+          console.log( new Date().getTime() / 1000, 'error',  x, y, z,)
+          console.log( errorMessage)
+        }
       }
 
-      // Возвратить результат
+
+      // Отправить пользователю результат
       res.writeHead( 200, {
         'Content-Type': 'image/png',
         'Content-Length': screenshot.length
@@ -98,6 +100,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
       return next( error( 400, 'Unknown mode value' ) )
   }
 })
+
 
 
 

@@ -35,55 +35,8 @@ async function makeTile( x, y, z, scriptName ) {
     // Призумить к нужному месту
     await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 10000} )
 
-    await page.waitFor( 200 )
-
     // Загрузить требуемую веб страницу
     await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 10000} )
-
-
-
-/*
-    // Чтобы показать на экране запрашиваемую область, введем в окошко поиска координаты ее центра
-    await page.focus( searchFieldSelector )
-    await page.keyboard.type( centerCoordinates )
-
-    // Дождаться, пока появится всплывающее меню и кликнем на первый предложенный адрес
-    await page.waitForSelector( searchPopUpMenuSelector , { visible : true, timeout: 50000 } )
-    await page.keyboard.press( 'Enter' )
-    await page.waitFor( 1000 )
-
-    // После каждого поиска уровень зума сбрасывается на 18
-    const zoomLevelAfterSearch = 18
-
-    // Теперь можно приблизить или отдалить карту, если это требуется
-    if ( z < zoomLevelAfterSearch ) {
-      const count = zoomLevelAfterSearch - z
-      for ( var i = 0; i < count; i++ ) {
-        await page.click( zoomMinusButtonSelector )
-        await page.waitFor( 300 )
-      }
-
-    } else if ( z > zoomLevelAfterSearch ) {
-      const count = z - zoomLevelAfterSearch
-      for ( var i = 0; i < count; i++ ) {
-        await page.click( zoomPlusButtonSelector )
-        await page.waitFor( 300 )
-      }
-    }
-
-
-    // Оригинал - дождаться загрузки всех картинок
-    // await page.evaluate(async () => {
-    // const selectors = Array.from(document.querySelectorAll("img"));
-    // await Promise.all(selectors.map(img => {
-    //   if (img.complete) return;
-    //   return new Promise((resolve, reject) => {
-    //     img.addEventListener('load', resolve);
-    //     img.addEventListener('error', reject);
-    //     });
-    //   }));
-    // })
-*/
 
 
 
@@ -94,9 +47,9 @@ async function makeTile( x, y, z, scriptName ) {
 
 
 
-
     // Нажать на кнопку загрузки гео-данных
     await page.click( runButtonSelector )
+
 
     // Дождаться, когда окно просмотра карты обновится
     try {
