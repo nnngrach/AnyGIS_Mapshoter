@@ -1,14 +1,14 @@
 const puppeteer = require( 'puppeteer' )
 const express = require( 'express' )
 const path = require( 'path' )
-var timeout = require('connect-timeout')
+//var timeout = require('connect-timeout')
 
 
 const worker = require( './Modes/OverpassBase' )
 
 const PORT = process.env.PORT || 5000
 const app = express()
-app.use(timeout('29s'))
+//app.use(timeout('29s'))
 
 
 
@@ -64,18 +64,24 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
       try {
 
-          const screenshot = await worker.makeTile( Number( req.params.x ),
+          // const screenshot = await worker.makeTile( Number( req.params.x ),
+          //                                           Number( req.params.y ),
+          //                                           Number( req.params.z ),
+          //                                           scriptName )
+
+          const screenshot = worker.makeTile( Number( req.params.x ),
                                                     Number( req.params.y ),
                                                     Number( req.params.z ),
                                                     scriptName )
+          const screenshot2 = await screenshot
 
           res.writeHead( 200, {
             'Content-Type': 'image/png',
-            'Content-Length': screenshot.length
+            'Content-Length': screenshot2.length
           })
 
           console.log( req.params.x, req.params.y, req.params.z )
-          res.end( screenshot )
+          res.end( screenshot2 )
 
       } catch ( errorMessage ) {
           console.log( errorMessage )
