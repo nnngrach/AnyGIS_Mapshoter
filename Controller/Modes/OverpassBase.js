@@ -32,39 +32,26 @@ async function makeTile( x, y, z, scriptName ) {
 
   try {
 
-    //await page.waitFor( 1000 )
-
-
     // Призумить к нужному месту
     await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 5000001} )
-
-
-    //await page.waitFor( 2000 )
 
     // Загрузить требуемую веб страницу
     await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 5000002} )
 
 
-    //await page.waitFor( 2000 )
 
-
-
-    /*
+/*
     // Чтобы показать на экране запрашиваемую область, введем в окошко поиска координаты ее центра
     await page.focus( searchFieldSelector )
     await page.keyboard.type( centerCoordinates )
-
 
     // Дождаться, пока появится всплывающее меню и кликнем на первый предложенный адрес
     await page.waitForSelector( searchPopUpMenuSelector , { visible : true, timeout: 50000 } )
     await page.keyboard.press( 'Enter' )
     await page.waitFor( 1000 )
-    */
 
-    /*
     // После каждого поиска уровень зума сбрасывается на 18
     const zoomLevelAfterSearch = 18
-
 
     // Теперь можно приблизить или отдалить карту, если это требуется
     if ( z < zoomLevelAfterSearch ) {
@@ -72,8 +59,6 @@ async function makeTile( x, y, z, scriptName ) {
       for ( var i = 0; i < count; i++ ) {
         await page.click( zoomMinusButtonSelector )
         await page.waitFor( 300 )
-        //await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-tile-pane > div > div.leaflet-tile-container.leaflet-zoom-animated > img:nth-child(1)' )
-        //await page.waitForSelector( '#map > div.leaflet-map-pane > div.leaflet-tile-pane > div > div:nth-child(2)' )
       }
 
     } else if ( z > zoomLevelAfterSearch ) {
@@ -83,7 +68,6 @@ async function makeTile( x, y, z, scriptName ) {
         await page.waitFor( 300 )
       }
     }
-    */
 
 
     // Оригинал - дождаться загрузки всех картинок
@@ -97,10 +81,7 @@ async function makeTile( x, y, z, scriptName ) {
     //     });
     //   }));
     // })
-
-
-//=================================
-
+*/
 
 
 
@@ -120,10 +101,7 @@ async function makeTile( x, y, z, scriptName ) {
       await page.waitForSelector( mapIsEmptyMessageSelector, { visible : true, timeout: 1000  } )
     } catch {
       await page.waitForSelector( mapViewSelector, { visible : true, timeout: 1200000  } )
-      //await page.waitForSelector( 'body')
     }
-
-
 
 
 

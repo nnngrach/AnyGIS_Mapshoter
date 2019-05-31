@@ -1,10 +1,10 @@
 const puppeteer = require( 'puppeteer' )
 const express = require( 'express' )
 const path = require( 'path' )
-//var timeout = require('connect-timeout')
-
+//const timeout = require('connect-timeout')
 
 const worker = require( './Modes/OverpassBase' )
+
 
 const PORT = process.env.PORT || 5000
 const app = express()
@@ -34,12 +34,10 @@ app.get( '/:x/:y/:z', async ( req, res, next ) => {
   if ( !req.params.z ) return next( error( 400, 'No Z paramerer' ))
   if ( !req.query.script ) return next( error( 400, 'No script paramerer' ) )
 
-  //const randomValue = randomInt( 1, 19 )
-  const randomValue = randomInt( 1, 6 )
-  //console.log(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
-  //res.redirect(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
-  res.redirect(`https://mapshoter10${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
-})
+  const randomValue = randomInt( 1, 31 )
+  res.redirect(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
+  console.log(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
+  })
 
 
 
@@ -49,7 +47,7 @@ app.get( '/:x/:y/:z', async ( req, res, next ) => {
 app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
   console.log('==============================')
-  //console.log(new Date().getTime() / 1000, ' - R app get')
+  console.log(new Date().getTime() / 1000, ' - R app get', req.params.x, req.params.y, req.params.z)
 
   if ( !isInt( req.params.x )) return next( error( 400, 'X must must be Intager' ))
   if ( !isInt( req.params.y )) return next( error( 400, 'Y must must be Intager' ))
@@ -66,27 +64,21 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
       try {
 
-          // const screenshot = await worker.makeTile( Number( req.params.x ),
-          //                                           Number( req.params.y ),
-          //                                           Number( req.params.z ),
-          //                                           scriptName )
-
-          const screenshot = worker.makeTile( Number( req.params.x ),
+          const screenshot = await worker.makeTile( Number( req.params.x ),
                                                     Number( req.params.y ),
                                                     Number( req.params.z ),
                                                     scriptName )
-          const screenshot2 = await screenshot
 
           res.writeHead( 200, {
             'Content-Type': 'image/png',
             'Content-Length': screenshot2.length
           })
 
-          console.log( req.params.x, req.params.y, req.params.z )
-          res.end( screenshot2 )
+          console.log(new Date().getTime() / 1000, ' - R app res', req.params.x, req.params.y, req.params.z)
+          res.end( screenshot )
 
       } catch ( errorMessage ) {
-          console.log( errorMessage )
+          console.log( new Date().getTime() / 1000,  req.params.x, req.params.y, req.params.z, errorMessage)
           return next( errorMessage )
       }
 
