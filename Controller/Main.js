@@ -1,15 +1,10 @@
 const puppeteer = require( 'puppeteer' )
 const express = require( 'express' )
 const path = require( 'path' )
-//const timeout = require('connect-timeout')
-
 const worker = require( './Modes/OverpassBase' )
-
 
 const PORT = process.env.PORT || 5000
 const app = express()
-//app.use(timeout('29s'))
-
 
 
 app.listen( PORT, () => {
@@ -23,7 +18,6 @@ app.get( '/', async ( req, res, next ) => {
   })
   res.end( 'Puppeteer utility for AnyGIS' )
 })
-
 
 
 // Для перенаправления на одно из свободных зеркал
@@ -42,16 +36,24 @@ app.get( '/:x/:y/:z', async ( req, res, next ) => {
 
 
 
-
 // Для непосредственной загрузки тайла
 app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
-  console.log('==============================')
-  console.log(new Date().getTime() / 1000, ' - R app get', req.params.x, req.params.y, req.params.z)
+  const x = req.params.x
+  const y = req.params.y
+  const z = req.params.z
 
-  if ( !isInt( req.params.x )) return next( error( 400, 'X must must be Intager' ))
-  if ( !isInt( req.params.y )) return next( error( 400, 'Y must must be Intager' ))
-  if ( !isInt( req.params.z )) return next( error( 400, 'Z must must be Intager' ))
+  console.log(new Date().getTime() / 1000, ' - R app get', x, y, z)
+
+  if ( !isInt( x )) return next( error( 400, 'X must must be Intager' ))
+  if ( !isInt( y )) return next( error( 400, 'Y must must be Intager' ))
+  if ( !isInt( z )) return next( error( 400, 'Z must must be Intager' ))
+
+
+  // Чтобы избежать ошибки "С вашего IP поступает слишком много запросов"
+  // Сделаем, чтобы запросы запускались в разное время
+  const randomValue = randomInt( 200, 1000 )
+  await wait(randomValue)
 
 
   switch ( req.params.mode ) {
@@ -60,38 +62,46 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
       const scriptName = req.query.script
       if ( !scriptName ) return next( error( 400, 'No script paramerer' ) )
-      if ( Number( req.params.z ) < 15 ) return next( error( 400, 'Zoom level < 15' ) )
 
-      try {
-
-          const screenshot = await worker.makeTile( Number( req.params.x ),
-                                                    Number( req.params.y ),
-                                                    Number( req.params.z ),
-                                                    scriptName )
-
-          res.writeHead( 200, {
-            'Content-Type': 'image/png',
-            'Content-Length': screenshot2.length
-          })
-
-          console.log(new Date().getTime() / 1000, ' - R app res', req.params.x, req.params.y, req.params.z)
-          res.end( screenshot )
-
-      } catch ( errorMessage ) {
-          console.log( new Date().getTime() / 1000,  req.params.x, req.params.y, req.params.z, errorMessage)
-          return next( errorMessage )
+      // Чтобы не перегружать Overpass не будем делать запросы для слишком больших территорий.
+      // Просто покажем пустую карту для этих масштабов.
+      if ( Number( z ) < 15 ) {
+        return res.redirect(`http://tile.openstreetmap.org/${z}/${x}/${y}.png`)
       }
 
+
+      var screenshot
+
+      try {
+        screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName )
+
+      // Если что-то заглючило, то попробовать еще один раз
+      } catch ( errorMessage ) {
+
+        console.log( new Date().getTime() / 1000,  x, y, z, errorMessage)
+        await wait(1000)
+        screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName )
+      }
+
+      // Возвратить результат
+      res.writeHead( 200, {
+        'Content-Type': 'image/png',
+        'Content-Length': screenshot.length
+      })
+
+      console.log(new Date().getTime() / 1000, ' - R app res', x, y, z)
+      return res.end( screenshot )
       break
 
 
     default:
       return next( error( 400, 'Unknown mode value' ) )
   }
-
 })
 
 
+
+// Вспомогательные функции
 
 function isInt( value ) {
   var x = parseFloat( value )
@@ -107,4 +117,10 @@ function error( status, msg ) {
 
 function randomInt(low, high) {
   return Math.floor(Math.random() * (high - low) + low)
+}
+
+async function wait(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
 }

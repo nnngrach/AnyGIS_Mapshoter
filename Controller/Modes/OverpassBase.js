@@ -33,10 +33,12 @@ async function makeTile( x, y, z, scriptName ) {
   try {
 
     // Призумить к нужному месту
-    await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 5000001} )
+    await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 10000} )
+
+    await page.waitFor( 200 )
 
     // Загрузить требуемую веб страницу
-    await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 5000002} )
+    await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 10000} )
 
 
 
@@ -100,7 +102,7 @@ async function makeTile( x, y, z, scriptName ) {
     try {
       await page.waitForSelector( mapIsEmptyMessageSelector, { visible : true, timeout: 1000  } )
     } catch {
-      await page.waitForSelector( mapViewSelector, { visible : true, timeout: 1200000  } )
+      await page.waitForSelector( mapViewSelector, { visible : true, timeout: 10000  } )
     }
 
 
