@@ -56,7 +56,8 @@ async function makeTile( x, y, z, scriptName ) {
     try {
       await page.waitForSelector( mapIsEmptyMessageSelector, { visible : true, timeout: 1000  } )
     } catch {
-      await page.waitForSelector( mapViewSelector, { visible : true, timeout: 10000  } )
+      //await page.waitForSelector( mapViewSelector, { visible : true, timeout: 10000  } )
+      await page.waitForSelector( mapViewSelector, { visible : true, timeout: 15000  } )
     }
 
 
