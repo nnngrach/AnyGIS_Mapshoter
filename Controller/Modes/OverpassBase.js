@@ -23,9 +23,10 @@ async function makeTile( x, y, z, scriptName ) {
 
   // Запустить и настроить браузер
   const pageUrl = 'http://overpass-turbo.eu/' + scriptName
-  const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
 
+  const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
   const browser = await puppeteer.launch(herokuDeploymentParams)
+
   const page = await browser.newPage()
   await page.setViewport( { width: 850, height: 450 } )
 
@@ -79,6 +80,7 @@ async function makeTile( x, y, z, scriptName ) {
 
 
   } catch ( error ) {
+    await browser.close()
     throw new Error( error.message )
   }
 }
