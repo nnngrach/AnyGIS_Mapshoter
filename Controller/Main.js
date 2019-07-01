@@ -6,16 +6,16 @@ const PORT = process.env.PORT || 5000
 const app = express()
 
 
-// server = require('http').createServer(app),
-// server.maxConnections = 2
-//
-// server.listen( PORT )
-// console.log( 'Listening on port ', PORT )
+server = require('http').createServer(app),
+server.maxConnections = 20
+
+server.listen( PORT )
+console.log( 'Listening on port ', PORT )
 
 
-app.listen( PORT, () => {
-  console.log( 'Listening on port ', PORT )
-})
+// app.listen( PORT, () => {
+//   console.log( 'Listening on port ', PORT )
+// })
 
 
 app.use(queue({ activeLimit: 2, queuedLimit: -1 }));
