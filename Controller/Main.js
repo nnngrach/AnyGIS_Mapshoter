@@ -1,6 +1,6 @@
 const puppeteer = require( 'puppeteer' )
 const express = require( 'express' )
-const path = require( 'path' )
+// const path = require( 'path' )
 
 
 const PORT = process.env.PORT || 5000
@@ -21,19 +21,19 @@ app.get( '/', async ( req, res, next ) => {
 
 
 
-// Для перенаправления пользователя на одно из свободных зеркал
-app.get( '/:x/:y/:z', async ( req, res, next ) => {
-
-  if ( !req.params.x ) return next( error( 400, 'No X paramerer' ))
-  if ( !req.params.y ) return next( error( 400, 'No Y paramerer' ))
-  if ( !req.params.z ) return next( error( 400, 'No Z paramerer' ))
-  if ( !req.query.script ) return next( error( 400, 'No script paramerer' ) )
-
-  const randomValue = randomInt( 1, 31 )
-  //const randomValue = randomInt( 1, 5 )
-  res.redirect(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
-  console.log(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
-  })
+// // Для перенаправления пользователя на одно из свободных зеркал
+// app.get( '/:x/:y/:z', async ( req, res, next ) => {
+//
+//   if ( !req.params.x ) return next( error( 400, 'No X paramerer' ))
+//   if ( !req.params.y ) return next( error( 400, 'No Y paramerer' ))
+//   if ( !req.params.z ) return next( error( 400, 'No Z paramerer' ))
+//   if ( !req.query.script ) return next( error( 400, 'No script paramerer' ) )
+//
+//   const randomValue = randomInt( 1, 31 )
+//   //const randomValue = randomInt( 1, 5 )
+//   res.redirect(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
+//   console.log(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
+//   })
 
 
 
@@ -45,7 +45,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
   const y = req.params.y
   const z = req.params.z
 
-  console.log(new Date().getTime() / 1000, ' - R app get', x, y, z)
+  console.log(new Date().getTime() / 1000, ' - R app get', z, x, y)
 
   if ( !isInt( x )) return next( error( 400, 'X must must be Intager' ))
   if ( !isInt( y )) return next( error( 400, 'Y must must be Intager' ))
@@ -73,26 +73,45 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
       // Делать все новые и новые попытки, пока тайл не загрузится
       var screenshot
       var isSucces = false
+      var counter = 0
 
-      while (!isSucces) {
+      while (!isSucces && counter < 3) {
+        counter += 1
+
         try {
-          console.log( new Date().getTime() / 1000, 'try',  x, y, z,)
+          console.log( new Date().getTime() / 1000, ' - R try',  z, x, y)
           screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName )
           isSucces = true
         } catch (errorMessage) {
-          console.log( new Date().getTime() / 1000, 'error',  x, y, z,)
+          console.log( new Date().getTime() / 1000, ' -- Error',  z, x, y)
           console.log( errorMessage)
         }
       }
 
 
       // Отправить пользователю результат
-      res.writeHead( 200, {
-        'Content-Type': 'image/png',
-        'Content-Length': screenshot.length
-      })
+      if (isSucces) {
+          console.log(new Date().getTime() / 1000, ' ---- R app res', z, x, y)
+          res.writeHead( 200, {
+            'Content-Type': 'image/png',
+            'Content-Length': screenshot.length
+          })
+      } else {
+          console.log(new Date().getTime() / 1000, ' ---- FAIL', z, x, y)
+          screenshot = 'Fetch tile count limit'
+          res.writeHead( 501, {
+            'Content-Type': 'text/plain',
+            'Content-Length': screenshot.length
+          })
+      }
 
-      console.log(new Date().getTime() / 1000, ' - R app res', x, y, z)
+
+      // // Отправить пользователю результат
+      // res.writeHead( 200, {
+      //   'Content-Type': 'image/png',
+      //   'Content-Length': screenshot.length
+      // })
+
       return res.end( screenshot )
       break
 
@@ -101,6 +120,9 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
       return next( error( 400, 'Unknown mode value' ) )
   }
 })
+
+
+
 
 
 
