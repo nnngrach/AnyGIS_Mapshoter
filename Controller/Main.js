@@ -55,6 +55,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
   const z = req.params.z
 
   console.log(new Date().getTime() / 1000, ' - R app get', z, x, y)
+  const startTime = new Date().getTime()
 
   if ( !isInt( x )) return next( error( 400, 'X must must be Intager' ))
   if ( !isInt( y )) return next( error( 400, 'Y must must be Intager' ))
@@ -78,6 +79,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
         return res.redirect(`http://tile.openstreetmap.org/${z}/${x}/${y}.png`)
       }
 
+      const delayTime = randomInt(0, 100)
 
       // Делать все новые и новые попытки, пока тайл не загрузится
       var screenshot
@@ -89,7 +91,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
         try {
           console.log( new Date().getTime() / 1000, ' - R try',  z, x, y)
-          screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName )
+          screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName, delayTime )
           isSucces = true
         } catch (errorMessage) {
           console.log( new Date().getTime() / 1000, ' -- Error',  z, x, y)
@@ -99,14 +101,17 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
 
       // Отправить пользователю результат
+      const endTime = new Date().getTime() - startTime
       if (isSucces) {
-          console.log(new Date().getTime() / 1000, ' ---- R app res', z, x, y)
+          //console.log(new Date().getTime() / 1000, ' ---- R app res', z, x, y)
+          console.log(endTime, ' ---- R app res', z, x, y)
           res.writeHead( 200, {
             'Content-Type': 'image/png',
             'Content-Length': screenshot.length
           })
       } else {
-          console.log(new Date().getTime() / 1000, ' ---- FAIL', z, x, y)
+          //console.log(new Date().getTime() / 1000, ' ---- FAIL', z, x, y)
+          console.log(endTime, ' ---- FAIL', z, x, y)
           screenshot = 'Fetch tile count limit'
           res.writeHead( 501, {
             'Content-Type': 'text/plain',

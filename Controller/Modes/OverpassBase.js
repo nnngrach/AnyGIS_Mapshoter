@@ -2,7 +2,7 @@ const puppeteer = require( 'puppeteer' )
 const geoTools = require( '../../ModelOfLogic/GeoTools' )
 
 
-async function makeTile( x, y, z, scriptName ) {
+async function makeTile( x, y, z, scriptName, delayTime ) {
 
   // Константы
   const searchFieldSelector = '#search'
@@ -32,6 +32,8 @@ async function makeTile( x, y, z, scriptName ) {
 
 
   try {
+
+    await page.waitFor( delayTime )
 
     // Призумить к нужному месту
     await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 10000} )
