@@ -48,11 +48,12 @@ app.get( '/', async ( req, res, next ) => {
 
 
 // Для непосредственной загрузки тайла
-app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
+app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
 
   const x = req.params.x
   const y = req.params.y
   const z = req.params.z
+  const minZ = req.params.minZ
 
   console.log(new Date().getTime() / 1000, ' - R app get', z, x, y)
   const startTime = new Date().getTime()
@@ -60,6 +61,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
   if ( !isInt( x )) return next( error( 400, 'X must must be Intager' ))
   if ( !isInt( y )) return next( error( 400, 'Y must must be Intager' ))
   if ( !isInt( z )) return next( error( 400, 'Z must must be Intager' ))
+  if ( !isInt( minZ )) return next( error( 400, 'MinimalZoom must must be Intager' ))
 
 
   // Выбираем режим обработки карты
@@ -75,7 +77,7 @@ app.get( '/:mode/:x/:y/:z', async ( req, res, next ) => {
 
       // Чтобы не перегружать Overpass не будем делать запросы для слишком больших территорий.
       // Просто покажем пустую карту для этих масштабов.
-      if ( Number( z ) < 15 ) {
+      if ( Number( z ) < minZ ) {
         return res.redirect(`http://tile.openstreetmap.org/${z}/${x}/${y}.png`)
       }
 
