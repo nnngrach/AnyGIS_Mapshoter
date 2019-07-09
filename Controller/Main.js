@@ -1,6 +1,6 @@
 const express = require( 'express' )
 const queue = require('express-queue')
-
+const requestHandler = require( './RequestHandler' )
 
 const PORT = process.env.PORT || 5000
 const app = express()
@@ -22,9 +22,7 @@ app.use(queue({ activeLimit: 2, queuedLimit: -1 }));
 
 
 app.get( '/', async ( req, res, next ) => {
-  res.writeHead( 200, {
-    'Content-Type': 'text/plain'
-  })
+  res.writeHead( 200, {'Content-Type': 'text/plain'})
   res.end( 'Puppeteer utility for AnyGIS' )
 })
 
@@ -32,14 +30,12 @@ app.get( '/', async ( req, res, next ) => {
 
 // // Для перенаправления пользователя на одно из свободных зеркал
 // app.get( '/:x/:y/:z', async ( req, res, next ) => {
-//
 //   if ( !req.params.x ) return next( error( 400, 'No X paramerer' ))
 //   if ( !req.params.y ) return next( error( 400, 'No Y paramerer' ))
 //   if ( !req.params.z ) return next( error( 400, 'No Z paramerer' ))
 //   if ( !req.query.script ) return next( error( 400, 'No script paramerer' ) )
 //
 //   const randomValue = randomInt( 1, 31 )
-//   //const randomValue = randomInt( 1, 5 )
 //   res.redirect(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
 //   console.log(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
 //   })
@@ -54,14 +50,15 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
   const y = req.params.y
   const z = req.params.z
   const minZ = req.params.minZ
+  const scriptName = req.query.script
 
-  console.log(new Date().getTime() / 1000, ' - R app get', z, x, y)
-  const startTime = new Date().getTime()
+  var moduleName, defaultUrl
 
   if ( !isInt( x )) return next( error( 400, 'X must must be Intager' ))
   if ( !isInt( y )) return next( error( 400, 'Y must must be Intager' ))
   if ( !isInt( z )) return next( error( 400, 'Z must must be Intager' ))
   if ( !isInt( minZ )) return next( error( 400, 'MinimalZoom must must be Intager' ))
+  if ( !scriptName ) return next( error( 400, 'No script paramerer' ) )
 
 
   // Выбираем режим обработки карты
@@ -69,59 +66,15 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
 
     // API для растеризации карты с сайта OverpassTurbo.eu
     case 'overpass':
+      moduleName = './Modes/OverpassBasic'
+      defaultUrl = 'http://tile.openstreetmap.org/${z}/${x}/${y}.png'
+      return requestHandler.makeRequest(x, y, z, minZ, scriptName, moduleName, defaultUrl, res)
+      break
 
-      const worker = require( './Modes/OverpassBase' )
-
-      const scriptName = req.query.script
-      if ( !scriptName ) return next( error( 400, 'No script paramerer' ) )
-
-      // Чтобы не перегружать Overpass не будем делать запросы для слишком больших территорий.
-      // Просто покажем пустую карту для этих масштабов.
-      if ( Number( z ) < minZ ) {
-        return res.redirect(`http://tile.openstreetmap.org/${z}/${x}/${y}.png`)
-      }
-
-      const delayTime = randomInt(0, 100)
-
-      // Делать все новые и новые попытки, пока тайл не загрузится
-      var screenshot
-      var isSucces = false
-      var counter = 0
-
-      while (!isSucces && counter < 3) {
-        counter += 1
-
-        try {
-          console.log( new Date().getTime() / 1000, ' - R try',  z, x, y)
-          screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName, delayTime )
-          isSucces = true
-        } catch (errorMessage) {
-          console.log( new Date().getTime() / 1000, ' -- Error',  z, x, y)
-          console.log( errorMessage)
-        }
-      }
-
-
-      // Отправить пользователю результат
-      const endTime = new Date().getTime() - startTime
-      if (isSucces) {
-          //console.log(new Date().getTime() / 1000, ' ---- R app res', z, x, y)
-          console.log(endTime, ' ---- R app res', z, x, y)
-          res.writeHead( 200, {
-            'Content-Type': 'image/png',
-            'Content-Length': screenshot.length
-          })
-      } else {
-          //console.log(new Date().getTime() / 1000, ' ---- FAIL', z, x, y)
-          console.log(endTime, ' ---- FAIL', z, x, y)
-          screenshot = 'Fetch tile count limit'
-          res.writeHead( 501, {
-            'Content-Type': 'text/plain',
-            'Content-Length': screenshot.length
-          })
-      }
-
-      return res.end( screenshot )
+    case 'overpassRunTrails':
+      moduleName = './Modes/OverpassRunTrails'
+      defaultUrl = 'http://tile.openstreetmap.org/${z}/${x}/${y}.png'
+      return requestHandler.makeRequest(x, y, z, minZ, scriptName, moduleName, defaultUrl, res)
       break
 
 
@@ -129,8 +82,6 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
       return next( error( 400, 'Unknown mode value' ) )
   }
 })
-
-
 
 
 
@@ -150,12 +101,9 @@ function error( status, msg ) {
   return err
 }
 
-function randomInt(low, high) {
-  return Math.floor(Math.random() * (high - low) + low)
-}
 
-async function wait(ms) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms);
-  });
-}
+// async function wait(ms) {
+//   return new Promise(resolve => {
+//     setTimeout(resolve, ms);
+//   });
+// }
