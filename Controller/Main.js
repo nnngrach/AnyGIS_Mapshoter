@@ -52,7 +52,7 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
   const minZ = req.params.minZ
   const scriptName = req.query.script
 
-  var moduleName, defaultUrl
+  var moduleName, defaultUrl, maxZ
 
   if ( !isInt( x )) return next( error( 400, 'X must must be Intager' ))
   if ( !isInt( y )) return next( error( 400, 'Y must must be Intager' ))
@@ -66,15 +66,31 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
 
     // API для растеризации карты с сайта OverpassTurbo.eu
     case 'overpass':
+      maxZ = 19
       moduleName = './Modes/OverpassBasic'
-      defaultUrl = 'http://tile.openstreetmap.org/${z}/${x}/${y}.png'
-      return requestHandler.makeRequest(x, y, z, minZ, scriptName, moduleName, defaultUrl, res)
+      defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
+      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
       break
 
     case 'overpassRunTrails':
+      maxZ = 19
       moduleName = './Modes/OverpassRunTrails'
-      defaultUrl = 'http://tile.openstreetmap.org/${z}/${x}/${y}.png'
-      return requestHandler.makeRequest(x, y, z, minZ, scriptName, moduleName, defaultUrl, res)
+      defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
+      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
+      break
+
+    case 'nakarte':
+      maxZ = 18
+      moduleName = './Modes/Nakarte'
+      defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
+      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
+      break
+
+    case 'waze':
+      maxZ = 17
+      moduleName = './Modes/Waze'
+      defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
+      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
       break
 
 

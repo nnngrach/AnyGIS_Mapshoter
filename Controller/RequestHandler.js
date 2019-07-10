@@ -1,4 +1,4 @@
-async function makeRequest(x, y, z, minZ, scriptName, patchToModule, defaultUrl, res ) {
+async function makeRequest(x, y, z, minZ, maxZ, scriptName, patchToModule, defaultUrl, res ) {
 
   //const worker = require( './Modes/OverpassBase' )
   const worker = require( patchToModule )
@@ -10,6 +10,15 @@ async function makeRequest(x, y, z, minZ, scriptName, patchToModule, defaultUrl,
   // Просто покажем пустую карту для этих масштабов.
   if ( Number( z ) < minZ ) {
     return res.redirect(defaultUrl)
+
+  } else if ( Number( z ) > maxZ )  {
+
+    const message = 'This zoom level not exist'
+    res.writeHead( 404, {
+      'Content-Type': 'text/plain',
+      'Content-Length': message.length
+    })
+    return res.end( message )
   }
 
   const delayTime = randomInt(0, 100)
@@ -19,7 +28,8 @@ async function makeRequest(x, y, z, minZ, scriptName, patchToModule, defaultUrl,
   var isSucces = false
   var counter = 0
 
-  while (!isSucces && counter < 2) {
+  //while (!isSucces && counter < 2) {
+  while (!isSucces && counter < 1) {
     counter += 1
 
     try {

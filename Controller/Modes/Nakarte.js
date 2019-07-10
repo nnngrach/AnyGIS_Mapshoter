@@ -15,20 +15,19 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
   const mapIsEmptyMessageSelector = '#map_blank'
   const loadingSelector ='body > div.modal > div > ul'
 
-  const emptyPageScript = 's/KBn'
-  scriptName = emptyPageScript
 
   // Рассчитать координаты краев и центра области для загрузки (тайла)
   const coordinates = geoTools.getAllCoordinates( x, y, z )
-  const bBox = `[bbox:${coordinates.bBox.latMin}, ${coordinates.bBox.lonMin}, ${coordinates.bBox.latMax}, ${coordinates.bBox.lonMax}];`;
-  //const centerCoordinates = `${coordinates.center.lat} ${coordinates.center.lon}`
-  const centerCoordinates = `${coordinates.center.lat};${coordinates.center.lon};${z}`
+  const centerCoordinates = `${z}/${coordinates.center.lat}/${coordinates.center.lon}&l=`
 
   // Запустить и настроить браузер
-  const pageUrl = 'http://overpass-turbo.eu/' + scriptName
+  const pageUrl = 'https://nakarte.me/#m=' + centerCoordinates + scriptName
+  //const pageUrl = 'https://nakarte.me/'
+  console.log(pageUrl)
 
   const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
-  const browser = await puppeteer.launch(herokuDeploymentParams)
+  //const browser = await puppeteer.launch(herokuDeploymentParams)
+  const browser = await puppeteer.launch()
 
   const page = await browser.newPage()
   await page.setViewport( { width: 850, height: 450 } )
@@ -36,75 +35,48 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
 
   try {
 
-    await page.waitFor( delayTime )
+    //await page.waitFor( delayTime )
 
-    // Призумить к нужному месту
-    await page.goto( `http://overpass-turbo.eu/?C=${centerCoordinates}`, { waitUntil: 'networkidle2', timeout: 10000} )
+    //await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 30000} )
+    //await page.goto( 'https://nakarte.me/#m=16/55.63134/37.55772&l=O/Gc', { waitUntil: 'networkidle0'} )
+    //await page.goto( 'https://nakarte.me/#m=16/55.63134/37.55772&l=O/Gc' )
 
-    // Загрузить требуемую веб страницу
-    //await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 10000} )
-    await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 50000} )
+    //const pageUrlTest = 'https://nakarte.me/#m=16/55.63134/37.55772&l=Ocm'
+    //const pageUrlTest = 'https://nakarte.me'
+    const pageUrlTest = 'https://nakarte.me/#m=10/55.75185/37.61856&l=O'
+    const pageUrlTest2 =  'https://nakarte.me/#m=17/55.61481345414472/37.547149658203125&l=Otm/Gc'
 
-
-
-
-    // async function copyPageUrl() {
-    //   try {
-    //     await navigator.clipboard.writeText('Hello, World!');
-    //     console.log('Page URL copied to clipboard');
-    //   } catch (err) {
-    //     console.error('Failed to copy: ', err);
-    //   }
-    // }
-    //
-    // await page.focus( codeEditorSelector )
-    //
-    // async function getClipboardContents() {
-    //   try {
-    //     const text = await navigator.clipboard.readText();
-    //     console.log('Pasted content: ', text);
-    //   } catch (err) {
-    //     console.error('Failed to read clipboard contents: ', err);
-    //   }
+    // try {
+    //   console.log( new Date().getTime() / 1000, ' goto')
+    //   await page.goto( pageUrlTest, { waitUntil: 'networkidle0', timeout: 20000} )
+    // } catch {
+    //   console.log( new Date().getTime() / 1000, ' goto catch')
+    //   await page.waitFor( 100 )
     // }
 
-
-//await document.querySelector(codeEditorSelector).value = 'Hello';
-
-// const textContent = await page.evaluate(() => {
-//   console.log('-!')
-//   const sel = '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1) > textarea'
-//   console.log('-!')
-//   console.log(document.querySelector(sel))
-//   console.log('!-')
-//   document.querySelector(sel).textContent = '123'
-//   return document.querySelector(sel);
-// });
+    //await page.goto( 'https://www.waze.com/ru/livemap?utm_campaign=waze_website' )
+    await page.goto( 'https://pereval.online/' )
+    //await page.goto( 'https://nakarte.me', { waitUntil: 'networkidle2', timeout: 40000} )
+    //await page.goto( pageUrlTest, { waitUntil: 'networkidle0', timeout: 40000} )
 
 
 
-const variableInNODEJS = '#editor > div.CodeMirror.CodeMirror-wrap > div.CodeMirror-scroll.cm-s-default > div > div > div.CodeMirror-lines > div > div:nth-child(5) > pre:nth-child(1)';
+    console.log( new Date().getTime() / 1000, ' next')
 
-const html = await page.evaluate(variableInBROWSER => {
-  //document.querySelector(variableInBROWSER).innerHTML = 'Hello world'
-  document.querySelector(variableInBROWSER).innerHTML = '[bbox:{{bbox}}];(node;);out;>;out skel qt;'
-  return document.querySelector(variableInBROWSER).innerHTML;
-}, variableInNODEJS);
-console.log(html)
+    await page.waitFor( 1000 )
 
-await page.focus( codeEditorSelector )
-await page.keyboard.type( ' ' )
-await page.waitFor( 1000 )
+    console.log( new Date().getTime() / 1000, ' next2')
+    //await page.waitForNavigation();
 
+    //await page.waitFor( 1000 )
 
-//============================================================
 
     /*
     // Вставить нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
     await page.focus( codeEditorSelector )
     await page.keyboard.type( bBox + ' //' )
     await page.waitFor( 100 )
-    */
+
 
 
     // Нажать на кнопку загрузки гео-данных
@@ -124,22 +96,33 @@ await page.waitFor( 1000 )
       }
     }
 
+    */
 
 
 
     // Сделать кадрированный скриншот
+    /*
     const options = {
       fullPage: false,
       clip: {x: 489, y: 123, width: 256, height: 256}
     }
+    */
+
+    console.log( new Date().getTime() / 1000, ' opt')
 
     const screenshot = await page.screenshot()
-    //const screenshot = await page.screenshot( options )
+    // const screenshot = await page.screenshot( options )
+
+    console.log( new Date().getTime() / 1000, ' screen')
+
     let imageBufferData = Buffer.from( screenshot, 'base64' )
+
+    console.log( new Date().getTime() / 1000, ' buffer')
 
 
     // Завершение работы
     await browser.close()
+    console.log( new Date().getTime() / 1000, ' browser close')
     return imageBufferData
 
 
@@ -149,9 +132,6 @@ await page.waitFor( 1000 )
     throw new Error( error.message )
   }
 }
-
-
-
 
 
 
