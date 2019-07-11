@@ -1,3 +1,10 @@
+// НЕ РАБОТАЕТ !
+// То ли глючит Puppeteer, то ли сам сайт Nakarte.me.
+// Часть метотодов никак не могут загрузить страницу - грузят пока не настает таймаут.
+// У части это удается. Но уже следующее действие - снимок скриншота - снимает от 30 до 150 сек.
+// И при этом он снимает только фоновый слой с тайлами. А слой с маркерами Westra или Geokashing - на снимок не попадает.
+
+
 const puppeteer = require( 'puppeteer' )
 const geoTools = require( '../../ModelOfLogic/GeoTools' )
 
@@ -5,132 +12,120 @@ const geoTools = require( '../../ModelOfLogic/GeoTools' )
 async function makeTile( x, y, z, scriptName, delayTime ) {
 
   // Константы
-  const searchFieldSelector = '#search'
-  const searchPopUpMenuSelector = '#ui-id-1'
-  const zoomPlusButtonSelector = '#map > div.leaflet-control-container > div.leaflet-top.leaflet-left > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-in'
-  const zoomMinusButtonSelector = '#map > div.leaflet-control-container > div.leaflet-top.leaflet-left > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-out'
-  const runButtonSelector = '#navs > div > div.buttons > div:nth-child(1) > a:nth-child(1)'
-  const codeEditorSelector = '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1) > textarea'
-  const mapViewSelector = '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg'
-  const mapIsEmptyMessageSelector = '#map_blank'
-  const loadingSelector ='body > div.modal > div > ul'
-
 
   // Рассчитать координаты краев и центра области для загрузки (тайла)
-  const coordinates = geoTools.getAllCoordinates( x, y, z )
-  const centerCoordinates = `${z}/${coordinates.center.lat}/${coordinates.center.lon}&l=`
+  // const coordinates = geoTools.getAllCoordinates( x, y, z )
+  // const centerCoordinates = `${z}/${coordinates.center.lat}/${coordinates.center.lon}&l=`
 
   // Запустить и настроить браузер
-  const pageUrl = 'https://nakarte.me/#m=' + centerCoordinates + scriptName
-  //const pageUrl = 'https://nakarte.me/'
-  console.log(pageUrl)
+  //const pageUrl = 'https://nakarte.me/#m=' + centerCoordinates + scriptName
 
-  const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
+  console.log( new Date().getTime() / 1000, ' browser starting ...')
+
+  //const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
   //const browser = await puppeteer.launch(herokuDeploymentParams)
-  const browser = await puppeteer.launch()
+  //const browser = await puppeteer.launch()
+
+ //  const browser = await puppeteer.launch({
+ //   headless: false,
+ //   args: ['--headless'],
+ // })
+
+ // const browser = await puppeteer.launch({
+ //    args: ['--enable-features=NetworkService'],
+ //    ignoreHTTPSErrors: true
+ //  })
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    ignoreHTTPSErrors: true,
+    args: ['--enable-features=NetworkService']
+  });
+
+
+
 
   const page = await browser.newPage()
-  await page.setViewport( { width: 850, height: 450 } )
+  //await page.setViewport( { width: 850, height: 450 } )
+  //await page.setViewport({width: 1000, height: 500});
+  //await page.setViewport( { width: 400, height: 200 } )
+  //await page.setViewport( { width: 1000, height: 2000 } )
 
-
-  try {
-
-    //await page.waitFor( delayTime )
-
-    //await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 30000} )
-    //await page.goto( 'https://nakarte.me/#m=16/55.63134/37.55772&l=O/Gc', { waitUntil: 'networkidle0'} )
-    //await page.goto( 'https://nakarte.me/#m=16/55.63134/37.55772&l=O/Gc' )
-
-    //const pageUrlTest = 'https://nakarte.me/#m=16/55.63134/37.55772&l=Ocm'
-    //const pageUrlTest = 'https://nakarte.me'
-    const pageUrlTest = 'https://nakarte.me/#m=10/55.75185/37.61856&l=O'
-    const pageUrlTest2 =  'https://nakarte.me/#m=17/55.61481345414472/37.547149658203125&l=Otm/Gc'
-
-    // try {
-    //   console.log( new Date().getTime() / 1000, ' goto')
-    //   await page.goto( pageUrlTest, { waitUntil: 'networkidle0', timeout: 20000} )
-    // } catch {
-    //   console.log( new Date().getTime() / 1000, ' goto catch')
-    //   await page.waitFor( 100 )
-    // }
-
-    //await page.goto( 'https://www.waze.com/ru/livemap?utm_campaign=waze_website' )
-    await page.goto( 'https://pereval.online/' )
-    //await page.goto( 'https://nakarte.me', { waitUntil: 'networkidle2', timeout: 40000} )
-    //await page.goto( pageUrlTest, { waitUntil: 'networkidle0', timeout: 40000} )
+  console.log( new Date().getTime() / 1000, ' browser done')
 
 
 
-    console.log( new Date().getTime() / 1000, ' next')
+  // await page.setRequestInterception(true)
+  // page.on('request', interceptedRequest => {
+  //   interceptedRequest.continue()
+  // })
 
-    await page.waitFor( 1000 )
-
-    console.log( new Date().getTime() / 1000, ' next2')
-    //await page.waitForNavigation();
-
-    //await page.waitFor( 1000 )
-
-
-    /*
-    // Вставить нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
-    await page.focus( codeEditorSelector )
-    await page.keyboard.type( bBox + ' //' )
-    await page.waitFor( 100 )
-
-
-
-    // Нажать на кнопку загрузки гео-данных
-    await page.click( runButtonSelector )
-
-
-    // Дождаться, когда окно просмотра карты обновится
-    try {
-      await page.waitForSelector( mapIsEmptyMessageSelector, { visible : true, timeout: 1000  } )
-    } catch {
-      //await page.waitForSelector( mapViewSelector, { visible : true, timeout: 10000  } )
-      try {
-        await page.waitForSelector( loadingSelector, { visible : false, timeout: 10000 } )
-        await page.waitFor( 1000 )
-      } catch {
-        await page.waitFor( 500 )
-      }
-    }
-
-    */
+  // await page.setRequestInterception(true)
+  // page.on("request", (request) => {
+  //   if (request.resourceType === "Image")
+  //     request.abort();
+  //   else
+  //     request.continue();
+  // });
+  //
+  // await page.waitFor( 2000 )
 
 
 
-    // Сделать кадрированный скриншот
-    /*
-    const options = {
-      fullPage: false,
-      clip: {x: 489, y: 123, width: 256, height: 256}
-    }
-    */
 
-    console.log( new Date().getTime() / 1000, ' opt')
+  console.log( new Date().getTime() / 1000, ' goto starting...')
 
-    const screenshot = await page.screenshot()
-    // const screenshot = await page.screenshot( options )
-
-    console.log( new Date().getTime() / 1000, ' screen')
-
-    let imageBufferData = Buffer.from( screenshot, 'base64' )
-
-    console.log( new Date().getTime() / 1000, ' buffer')
+  //await page.goto( 'https://nakarte.me' )
+  //await page.goto( 'https://nakarte.me/#m=17/55.76114/37.64742&l=Ocm' )
+  // await page.goto( 'https://nakarte.me/#m=13/43.18245/42.49750&l=Otm/Wp' )
+  //await page.goto('https://nakarte.me/#m=13/43.18245/42.49750&l=Otm/Wp', {"waitUntil" : "networkidle0", "timeout": 0});
+  // await page.goto('https://nakarte.me/#m=13/43.18245/42.49750&l=Otm/Wp', {"waitUntil" : "networkidle2", "timeout": 0});
+  //await page.goto('https://nakarte.me/#m=17/55.76114/37.64742&l=Ocm', { waitUntil: "domcontentloaded" });
+  //await page.goto('https://nakarte.me/#m=13/43.18245/42.49750&l=Otm/Wp', { waitUntil: "domcontentloaded" });
+  //await page.goto('https://leafletjs.com/', { waitUntil: "domcontentloaded" });
+  //await page.goto('https://leafletjs.com/');
 
 
-    // Завершение работы
-    await browser.close()
-    console.log( new Date().getTime() / 1000, ' browser close')
-    return imageBufferData
+  await page.goto('https://nakarte.me/#m=13/43.18245/42.49750&l=Otm/Wp', { timeout: 15000, waitUntil: "load" })
+  //await page.goto('https://nakarte.me/#m=13/43.18245/42.49750&l=Otm/Wp', {"waitUntil" : "networkidle2", "timeout": 0});
+  console.log( new Date().getTime() / 1000, ' goto done')
 
 
 
-  } catch ( error ) {
-    await browser.close()
-    throw new Error( error.message )
-  }
+
+  console.log( new Date().getTime() / 1000, ' content waiting...')
+  // Иммитация ожидания полной загрузки страницы
+  // Если ее активировать, то снять скриншот уже не удастся
+  //await page.waitFor( 5000 )
+  console.log( new Date().getTime() / 1000, ' content loaded')
+
+
+  // await page.content()
+  // const selector = '#map'
+  // await page.waitForSelector( selector, { visible : true, timeout: 1000  } )
+
+
+
+
+  console.log( new Date().getTime() / 1000, ' screenshot starting...')
+
+  const screenshot = await page.screenshot()
+  //const screenshot = await page.screenshot().catch(error => console.log("!!! My screenshot error: ", error));
+  // const screenshot = await page.screenshot( options )
+
+  console.log( new Date().getTime() / 1000, ' screenshot done')
+
+
+  console.log( new Date().getTime() / 1000, ' buffer starting...')
+  let imageBufferData = Buffer.from( screenshot, 'base64' )
+  console.log( new Date().getTime() / 1000, ' buffer done')
+
+
+
+  // Завершение работы
+  await browser.close()
+  console.log( new Date().getTime() / 1000, ' browser close')
+  return imageBufferData
 }
 
 

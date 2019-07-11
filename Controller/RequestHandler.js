@@ -21,15 +21,16 @@ async function makeRequest(x, y, z, minZ, maxZ, scriptName, patchToModule, defau
     return res.end( message )
   }
 
-  const delayTime = randomInt(0, 100)
+  const delayTime = randomInt(0, 1000)
 
   // Делать все новые и новые попытки, пока тайл не загрузится
+  const maxTryCount = 2
+
   var screenshot
   var isSucces = false
   var counter = 0
 
-  //while (!isSucces && counter < 2) {
-  while (!isSucces && counter < 1) {
+  while (!isSucces && counter < maxTryCount) {
     counter += 1
 
     try {
@@ -46,15 +47,13 @@ async function makeRequest(x, y, z, minZ, maxZ, scriptName, patchToModule, defau
   // Отправить пользователю результат
   const endTime = new Date().getTime() - startTime
   if (isSucces) {
-      //console.log(new Date().getTime() / 1000, ' ---- R app res', z, x, y)
-      console.log(endTime, ' ---- R app res', z, x, y)
+      console.log(new Date().getTime() / 1000, endTime, ' ---- R app res', z, x, y)
       res.writeHead( 200, {
         'Content-Type': 'image/png',
         'Content-Length': screenshot.length
       })
   } else {
-      //console.log(new Date().getTime() / 1000, ' ---- FAIL', z, x, y)
-      console.log(endTime, ' ---- FAIL', z, x, y)
+      console.log(new Date().getTime() / 1000, endTime, ' ---- FAIL', z, x, y)
       screenshot = 'Fetch tile count limit'
       res.writeHead( 501, {
         'Content-Type': 'text/plain',
@@ -63,7 +62,6 @@ async function makeRequest(x, y, z, minZ, maxZ, scriptName, patchToModule, defau
   }
 
   return res.end( screenshot )
-
 }
 
 

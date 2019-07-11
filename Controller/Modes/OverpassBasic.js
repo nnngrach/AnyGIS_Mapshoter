@@ -14,12 +14,12 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
   const mapViewSelector = '#map > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-overlay-pane > svg'
   const mapIsEmptyMessageSelector = '#map_blank'
   const loadingSelector ='body > div.modal > div > ul'
+  const loadedDataIndicatorSelector = '#data_stats'
 
 
   // Рассчитать координаты краев и центра области для загрузки (тайла)
   const coordinates = geoTools.getAllCoordinates( x, y, z )
   const bBox = `[bbox:${coordinates.bBox.latMin}, ${coordinates.bBox.lonMin}, ${coordinates.bBox.latMax}, ${coordinates.bBox.lonMax}];`;
-  //const centerCoordinates = `${coordinates.center.lat} ${coordinates.center.lon}`
   const centerCoordinates = `${coordinates.center.lat};${coordinates.center.lon};${z}`
 
   // Запустить и настроить браузер
@@ -41,7 +41,7 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
 
     // Загрузить требуемую веб страницу
     //await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 10000} )
-    await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 50000} )
+    await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 20000} )
 
 
 
@@ -58,17 +58,20 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
 
     // Дождаться, когда окно просмотра карты обновится
     try {
-      await page.waitForSelector( mapIsEmptyMessageSelector, { visible : true, timeout: 1000  } )
+      console.log( 'mapIsEmptyMessageSelector')
+      await page.waitForSelector( mapIsEmptyMessageSelector, { visible : true, timeout: 500  } )
     } catch {
       //await page.waitForSelector( mapViewSelector, { visible : true, timeout: 10000  } )
       try {
-        await page.waitForSelector( loadingSelector, { visible : false, timeout: 10000 } )
-        await page.waitFor( 1000 )
+        console.log( 'loadingSelector')
+        await page.waitForSelector( '#data_stats' )
       } catch {
+        console.log( 'catch')
         await page.waitFor( 500 )
       }
     }
 
+    //await page.waitFor( 1000 )
 
 
 

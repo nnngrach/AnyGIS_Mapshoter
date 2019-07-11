@@ -12,13 +12,12 @@ server.maxConnections = 20
 server.listen( PORT )
 console.log( 'Listening on port ', PORT )
 
-
 // app.listen( PORT, () => {
 //   console.log( 'Listening on port ', PORT )
 // })
 
-
 app.use(queue({ activeLimit: 2, queuedLimit: -1 }));
+
 
 
 app.get( '/', async ( req, res, next ) => {
@@ -27,17 +26,10 @@ app.get( '/', async ( req, res, next ) => {
 })
 
 
-
-// // Для перенаправления пользователя на одно из свободных зеркал
+// Для перенаправления пользователя на одно из свободных зеркал
 // app.get( '/:x/:y/:z', async ( req, res, next ) => {
-//   if ( !req.params.x ) return next( error( 400, 'No X paramerer' ))
-//   if ( !req.params.y ) return next( error( 400, 'No Y paramerer' ))
-//   if ( !req.params.z ) return next( error( 400, 'No Z paramerer' ))
-//   if ( !req.query.script ) return next( error( 400, 'No script paramerer' ) )
-//
 //   const randomValue = randomInt( 1, 31 )
 //   res.redirect(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
-//   console.log(`https://mapshoter${randomValue}.herokuapp.com/overpass/${req.params.x}/${req.params.y}/${req.params.z}?script=${req.query.script}`)
 //   })
 
 
@@ -72,19 +64,6 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
       return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
       break
 
-    case 'overpassRunTrails':
-      maxZ = 19
-      moduleName = './Modes/OverpassRunTrails'
-      defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
-      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
-      break
-
-    case 'nakarte':
-      maxZ = 18
-      moduleName = './Modes/Nakarte'
-      defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
-      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
-      break
 
     case 'waze':
       maxZ = 17
@@ -93,6 +72,12 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
       return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
       break
 
+    // case 'nakarte':
+    //   maxZ = 18
+    //   moduleName = './Modes/Nakarte'
+    //   defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
+    //   return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
+    //   break
 
     default:
       return next( error( 400, 'Unknown mode value' ) )

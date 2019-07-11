@@ -5,21 +5,13 @@ const geoTools = require( '../../ModelOfLogic/GeoTools' )
 async function makeTile( x, y, z, scriptName, delayTime ) {
 
   // Константы
-  const searchFieldSelector = '#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-medium.wm-map--zoom-14 > div.leaflet-control-container > div.leaflet-top.leaflet-left > div > div > input'
-  const zoomSelectorPrefixHi = '#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-close.wm-map--zoom-'
-  const zoomSelectorPrefixMid = '#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-medium.wm-map--zoom-'
-  const zoomSelectorPrefixLow = '#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-far.wm-map--zoom-'
-  //#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-medium.wm-map--zoom-13 > div.leaflet-control-container > div.leaflet-bottom.leaflet-right > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-out
-  //#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-medium.wm-map--zoom-12 > div.leaflet-control-container > div.leaflet-bottom.leaflet-right > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-out
-  //#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-far.wm-map--zoom-11 > div.leaflet-control-container > div.leaflet-bottom.leaflet-right > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-out
-  //#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-far.wm-map--zoom-10 > div.leaflet-control-container > div.leaflet-bottom.leaflet-right > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-out
-  //#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-far.wm-map--zoom-9 > div.leaflet-control-container > div.leaflet-bottom.leaflet-right > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-out
-  //#map > div.wm-map__leaflet.wm-map.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom.wm-map--zoom-far.wm-map--zoom-8 > div.leaflet-control-container > div.leaflet-bottom.leaflet-right > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-out
-  const zoomPlusSelector = ' > div.leaflet-control-container > div.leaflet-bottom.leaflet-right > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-in'
-  const zoomMinusSelector = ' > div.leaflet-control-container > div.leaflet-bottom.leaflet-right > div.leaflet-control-zoom.leaflet-bar.leaflet-control > a.leaflet-control-zoom-out'
+  const defaultZoomLevel = 15
   const directionButonSelector = '#gtm-poi-card-get-directions > i'
   const deletePinButonSelector = '#map > div.wm-cards > div.wm-card.is-routing > div > div.wm-routing__top > div.wm-routing__search > div > div.wm-route-search__to > div > div.wm-search__clear-icon > div'
-  const defaultZoomLevel = 15
+  const searchFieldXPath = '//*[@id="map"]/div[2]/div[2]/div[1]/div/div/input'
+  const zoomPlusXPath = '//*[@id="map"]/div[2]/div[2]/div[4]/div[1]/a[1]'
+  const zoomMinusXPath = '//*[@id="map"]/div[2]/div[2]/div[4]/div[1]/a[2]'
+
 
 
   // Рассчитать координаты краев и центра области для загрузки (тайла)
@@ -41,47 +33,30 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
     await page.waitFor( delayTime )
     await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 10000} )
 
-
     // Навести карту на центр тайла
-    await page.click ( searchFieldSelector )
+    await click(searchFieldXPath, page)
     await page.keyboard.type( centerCoordinates )
     page.keyboard.press('Enter');
     await page.waitFor( 500 )
 
 
-
     // Подогнать масштаб
     if (z > defaultZoomLevel) {
       for (var i = 0; i < z-defaultZoomLevel; i++) {
-        const currentZoom = defaultZoomLevel + i
-        const selector = zoomSelectorPrefixHi + currentZoom + zoomPlusSelector
-        await page.click(selector)
+        await click(zoomMinusXPath, page)
         await page.waitFor( 300 )
       }
+
     } else if (z < defaultZoomLevel) {
-
       for (var i = 0; i < defaultZoomLevel-z; i++) {
-
-        //Адрес кнопок зума меняется в зависимости от текущего зума
-        var currentPrefix
-        if (i < 1) {
-          currentPrefix = zoomSelectorPrefixHi
-        } else if (i < 4) {
-          currentPrefix = zoomSelectorPrefixMid
-        } else {
-          currentPrefix = zoomSelectorPrefixLow
-        }
-
-        const currentZoom = defaultZoomLevel - i
-        const selector = currentPrefix + currentZoom + zoomMinusSelector
-        await page.click(selector)
+        await click(zoomMinusXPath, page)
         await page.waitFor( 300 )
       }
     }
 
 
 
-    // Удалить появившийся по центру карты указатель
+    // Удалить появившийся по центру экрана маркер
     await page.click ( directionButonSelector )
     await page.waitFor( 100 )
     await page.click ( deletePinButonSelector )
@@ -111,6 +86,20 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
   } catch ( error ) {
     await browser.close()
     throw new Error( error.message )
+  }
+}
+
+
+
+
+async function click( xPathSelector, page ) {
+  await page.waitForXPath(xPathSelector)
+  const foundedElements = await page.$x(xPathSelector)
+
+  if (foundedElements.length > 0) {
+    await foundedElements[0].click()
+  } else {
+    throw new Error("XPath element not found: ", xPathSelector)
   }
 }
 
