@@ -15,6 +15,7 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
   const mapIsEmptyMessageSelector = '#map_blank'
   const loadingSelector ='body > div.modal > div > ul'
   const loadedDataIndicatorSelector = '#data_stats'
+  const loadingScreenTableSelector = 'body > div.modal > div > ul > li:nth-child(1)'
 
 
   // Рассчитать координаты краев и центра области для загрузки (тайла)
@@ -52,10 +53,16 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
 
 
 
+
     // Нажать на кнопку загрузки гео-данных
     await page.click( runButtonSelector )
 
+    // Дождаться, когда скроется окно с индикатором загрузки
+    await page.waitForFunction(() => !document.querySelector('body > div.modal > div > ul > li:nth-child(1)'), {polling: 'mutation'});
+    await page.waitFor( 1000 )
 
+
+/*
     // Дождаться, когда окно просмотра карты обновится
     try {
       console.log( 'mapIsEmptyMessageSelector')
@@ -70,8 +77,9 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
         await page.waitFor( 500 )
       }
     }
+*/
 
-    //await page.waitFor( 1000 )
+
 
 
 
