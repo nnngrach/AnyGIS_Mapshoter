@@ -43,7 +43,7 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
     // Подогнать масштаб
     if (z > defaultZoomLevel) {
       for (var i = 0; i < z-defaultZoomLevel; i++) {
-        await click(zoomMinusXPath, page)
+        await click(zoomPlusXPath, page)
         await page.waitFor( 300 )
       }
 

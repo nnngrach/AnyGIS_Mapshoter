@@ -16,7 +16,7 @@ console.log( 'Listening on port ', PORT )
 //   console.log( 'Listening on port ', PORT )
 // })
 
-app.use(queue({ activeLimit: 2, queuedLimit: -1 }));
+app.use(queue({ activeLimit: 2, queuedLimit: -1 }))
 
 
 
@@ -56,7 +56,7 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
   // Выбираем режим обработки карты
   switch ( req.params.mode ) {
 
-    // API для растеризации карты с сайта OverpassTurbo.eu
+    // OverpassTurbo.eu
     case 'overpass':
       maxZ = 19
       moduleName = './Modes/OverpassBasic'
@@ -64,20 +64,21 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
       return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
       break
 
-
+    // Waze.com
     case 'waze':
       maxZ = 17
       moduleName = './Modes/Waze'
-      defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
+      defaultUrl = `https://worldtiles1.waze.com/tiles/${z}/${x}/${y}.png`
       return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
       break
 
-    // case 'nakarte':
-    //   maxZ = 18
-    //   moduleName = './Modes/Nakarte'
-    //   defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
-    //   return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
-    //   break
+    // Nakarte.me  
+    case 'nakarte':
+      maxZ = 18
+      moduleName = './Modes/Nakarte'
+      defaultUrl = `https://tile.opentopomap.org/${z}/${x}/${y}.png`
+      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
+      break
 
     default:
       return next( error( 400, 'Unknown mode value' ) )
