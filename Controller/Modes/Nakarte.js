@@ -1,11 +1,12 @@
 const puppeteer = require( 'puppeteer' )
 const geoTools = require( '../../ModelOfLogic/GeoTools' )
 
-async function makeTile( x, y, z, scriptName, delayTime ) {
+async function makeTile( x, y, z, scriptName, delayTime, browserPromise ) {
 
-  const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
+  const browser = await browserPromise
+  //const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
+	//const browser = await puppeteer.launch(herokuDeploymentParams)
 
-	const browser = await puppeteer.launch(herokuDeploymentParams)
 	const page = await browser.newPage()
   await page.setViewport( { width: 650, height: 400 } )
 
@@ -24,7 +25,7 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
   const screenshot = await page.screenshot( options )
 	let imageBufferData = Buffer.from( screenshot, 'base64' )
 
-	await browser.close()
+	//await browser.close()
 	return imageBufferData
 }
 

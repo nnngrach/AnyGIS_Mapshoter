@@ -2,7 +2,7 @@ const puppeteer = require( 'puppeteer' )
 const geoTools = require( '../../ModelOfLogic/GeoTools' )
 
 
-async function makeTile( x, y, z, scriptName, delayTime ) {
+async function makeTile( x, y, z, scriptName, delayTime, browserPromise ) {
 
   // Константы
   const searchFieldSelector = '#search'
@@ -28,6 +28,7 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
 
   const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
   const browser = await puppeteer.launch(herokuDeploymentParams)
+  // const browser = await browserPromise
 
   const page = await browser.newPage()
   await page.setViewport( { width: 850, height: 450 } )
@@ -48,10 +49,11 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
 
     // Вставить нужные строки в окно редактора кода и дождаемся, когда IDE распознает их синтаксис
     await page.focus( codeEditorSelector )
+    //await page.keyboard.type( bBox + ' //' )
     await page.keyboard.type( bBox + ' //' )
     await page.waitFor( 100 )
 
-
+    //
 
 
     // Нажать на кнопку загрузки гео-данных
@@ -89,8 +91,8 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
       clip: {x: 489, y: 123, width: 256, height: 256}
     }
 
-    //const screenshot = await page.screenshot()
-    const screenshot = await page.screenshot( options )
+    const screenshot = await page.screenshot()
+    // const screenshot = await page.screenshot( options )
     let imageBufferData = Buffer.from( screenshot, 'base64' )
 
 

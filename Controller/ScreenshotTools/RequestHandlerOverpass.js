@@ -1,4 +1,5 @@
-async function makeRequest(x, y, z, minZ, maxZ, scriptName, patchToModule, defaultUrl, res ) {
+
+async function makeRequest(x, y, z, minZ, maxZ, scriptName, patchToModule, defaultUrl, res, browser, isBrowserBusyForOverpass ) {
 
   //const worker = require( './Modes/OverpassBase' )
   const worker = require( patchToModule )
@@ -35,7 +36,24 @@ async function makeRequest(x, y, z, minZ, maxZ, scriptName, patchToModule, defau
 
     try {
       console.log( new Date().getTime() / 1000, ' - R try',  z, x, y)
-      screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName, delayTime )
+
+      // screenshot = await worker.makeTile( Number( x ), Number( y ), Number( z ), scriptName, delayTime, browser )
+
+
+      while (isBrowserBusyForOverpass.value) {
+        console.log( 'while')
+        setTimeout(function() { console.log("sample"); }, 1000);
+      }
+
+      console.log( 'isBrowserBusyForOverpass = true')
+      isBrowserBusyForOverpass.value = true
+      const pageAndData = await worker.loadPage( Number( x ), Number( y ), Number( z ), scriptName, delayTime, browser )
+      isBrowserBusyForOverpass.value = false
+      console.log( 'isBrowserBusyForOverpass = false')
+
+      screenshot = await worker.makeTile( pageAndData )
+
+
       isSucces = true
     } catch (errorMessage) {
       console.log( new Date().getTime() / 1000, ' -- Error',  z, x, y)

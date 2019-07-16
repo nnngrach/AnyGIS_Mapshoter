@@ -2,7 +2,7 @@ const puppeteer = require( 'puppeteer' )
 const geoTools = require( '../../ModelOfLogic/GeoTools' )
 
 
-async function makeTile( x, y, z, scriptName, delayTime ) {
+async function makeTile( x, y, z, scriptName, delayTime, browserPromise ) {
 
   // Константы
   const defaultZoomLevel = 15
@@ -22,8 +22,9 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
   // Запустить и настроить браузер
   const pageUrl = 'https://www.waze.com/en/livemap?utm_campaign=waze_website'
 
-  const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
-  const browser = await puppeteer.launch(herokuDeploymentParams)
+  // const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
+  // const browser = await puppeteer.launch(herokuDeploymentParams)
+  const browser = await browserPromise
 
   const page = await browser.newPage()
   await page.setViewport( { width: 1100, height: 450 } )
@@ -78,13 +79,13 @@ async function makeTile( x, y, z, scriptName, delayTime ) {
 
 
     // Завершение работы
-    await browser.close()
+    //await browser.close()
     return imageBufferData
 
 
 
   } catch ( error ) {
-    await browser.close()
+    //await browser.close()
     throw new Error( error.message )
   }
 }

@@ -1,6 +1,12 @@
 const express = require( 'express' )
 const queue = require('express-queue')
-const requestHandler = require( './RequestHandler' )
+const requestHandlerOverpass = require( './ScreenshotTools/RequestHandlerOverpass' )
+const requestHandler = require( './ScreenshotTools/RequestHandler' )
+const browserFabric = require( './ScreenshotTools/BrowserFabric' )
+
+var isBrowserBusyForOverpass = { value: false}
+
+
 
 const PORT = process.env.PORT || 5000
 const app = express()
@@ -15,6 +21,8 @@ console.log( 'Listening on port ', PORT )
 // app.listen( PORT, () => {
 //   console.log( 'Listening on port ', PORT )
 // })
+
+const browserPromise = browserFabric.create()
 
 app.use(queue({ activeLimit: 2, queuedLimit: -1 }))
 
@@ -59,25 +67,32 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
     // OverpassTurbo.eu
     case 'overpass':
       maxZ = 19
-      moduleName = './Modes/OverpassBasic'
+      moduleName = '../Modes/OverpassBasic'
       defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
-      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
+      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res, browserPromise)
+      break
+
+    case 'overpass2':
+      maxZ = 19
+      moduleName = '../Modes/OverpassBasic2'
+      defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
+      return requestHandlerOverpass.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res, browserPromise, isBrowserBusyForOverpass)
       break
 
     // Waze.com
     case 'waze':
       maxZ = 17
-      moduleName = './Modes/Waze'
+      moduleName = '../Modes/Waze'
       defaultUrl = `https://worldtiles1.waze.com/tiles/${z}/${x}/${y}.png`
-      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
+      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res, browserPromise)
       break
 
-    // Nakarte.me  
+    // Nakarte.me
     case 'nakarte':
       maxZ = 18
-      moduleName = './Modes/Nakarte'
+      moduleName = '../Modes/Nakarte'
       defaultUrl = `https://tile.opentopomap.org/${z}/${x}/${y}.png`
-      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res)
+      return requestHandler.makeRequest(x, y, z, minZ, maxZ, scriptName, moduleName, defaultUrl, res, browserPromise)
       break
 
     default:
