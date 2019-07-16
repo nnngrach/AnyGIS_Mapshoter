@@ -26,9 +26,9 @@ async function makeTile( x, y, z, scriptName, delayTime, browserPromise ) {
   // Запустить и настроить браузер
   const pageUrl = 'http://overpass-turbo.eu/' + scriptName
 
-  const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
-  const browser = await puppeteer.launch(herokuDeploymentParams)
-  // const browser = await browserPromise
+  // const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
+  // const browser = await puppeteer.launch(herokuDeploymentParams)
+  const browser = await browserPromise
 
   const page = await browser.newPage()
   await page.setViewport( { width: 850, height: 450 } )
@@ -97,13 +97,15 @@ async function makeTile( x, y, z, scriptName, delayTime, browserPromise ) {
 
 
     // Завершение работы
-    await browser.close()
+    await page.close()
+    // await browser.close()
     return imageBufferData
 
 
 
   } catch ( error ) {
-    await browser.close()
+    await page.close()
+    // await browser.close()
     throw new Error( error.message )
   }
 }
