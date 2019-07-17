@@ -1,8 +1,8 @@
 const puppeteer = require( 'puppeteer' )
-const geoTools = require( '../../ModelOfLogic/GeoTools' )
+const geoTools = require( '../Service/GeoTools' )
 
 
-async function makeTile( x, y, z, scriptName, delayTime, browserPromise ) {
+async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromise ) {
 
   // Константы
   const defaultZoomLevel = 15
@@ -12,32 +12,23 @@ async function makeTile( x, y, z, scriptName, delayTime, browserPromise ) {
   const zoomPlusXPath = '//*[@id="map"]/div[2]/div[2]/div[4]/div[1]/a[1]'
   const zoomMinusXPath = '//*[@id="map"]/div[2]/div[2]/div[4]/div[1]/a[2]'
 
-
-
   // Рассчитать координаты краев и центра области для загрузки (тайла)
   const coordinates = geoTools.getAllCoordinates( x, y, z )
   const centerCoordinates = `lat=${coordinates.center.lat} lng=${coordinates.center.lon}`
 
-
-  // Запустить и настроить браузер
-  const pageUrl = 'https://www.waze.com/en/livemap?utm_campaign=waze_website'
-
-  // const herokuDeploymentParams = {'args' : ['--no-sandbox', '--disable-setuid-sandbox']}
-  // const browser = await puppeteer.launch(herokuDeploymentParams)
-
+  // Запустить и настроить страницу браузера
   const browser = await browserPromise
-
   const page = await browser.newPage()
   await page.setViewport( { width: 1100, height: 450 } )
+  await page.setUserAgent(userAgent);
 
 
   try {
-    await page.waitFor( delayTime )
+    //await page.waitFor( delayTime )
+
+    // Загрузить страницу с картой
+    const pageUrl = 'https://www.waze.com/en/livemap?utm_campaign=waze_website'
     await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 10000} )
-
-
-
-
 
     // Навести карту на центр тайла
     await click(searchFieldXPath, page)
@@ -45,25 +36,7 @@ async function makeTile( x, y, z, scriptName, delayTime, browserPromise ) {
     page.keyboard.press('Enter');
     await page.waitFor( 500 )
 
-    /*
-    const currentZoom = await fetchCurrentZoom(page)
-
-
     // Подогнать масштаб
-    if (z > currentZoom) {
-      for (var i = 0; i < z-defaultZoomLevel; i++) {
-        await click(zoomPlusXPath, page)
-        await page.waitFor( 500 )
-      }
-
-    } else if (z < currentZoom) {
-      for (var i = 0; i < defaultZoomLevel-z; i++) {
-        await click(zoomMinusXPath, page)
-        await page.waitFor( 500 )
-      }
-    }
-    */
-
     while(z > await fetchCurrentZoom(page)) {
       await click(zoomPlusXPath, page)
       await page.waitFor( 300 )
@@ -74,42 +47,31 @@ async function makeTile( x, y, z, scriptName, delayTime, browserPromise ) {
       await page.waitFor( 300 )
     }
 
-
     // Удалить появившийся по центру экрана маркер
     await page.click ( directionButonSelector )
     await page.waitFor( 100 )
     await page.click ( deletePinButonSelector )
     await page.waitFor( 100 )
 
-
-
     // Сделать кадрированный скриншот
-    const options = {
+    const cropOptions = {
       fullPage: false,
       clip: {x: 422, y: 97, width: 256, height: 256}
     }
 
-
-
     //const screenshot = await page.screenshot()
-    const screenshot = await page.screenshot( options )
-    let imageBufferData = Buffer.from( screenshot, 'base64' )
-
+    const screenshot = await page.screenshot( cropOptions )
 
     // Завершение работы
-    //await browser.close()
     await page.close()
-    return imageBufferData
-
+    return screenshot
 
 
   } catch ( error ) {
     await page.close()
-    //await browser.close()
     throw new Error( error.message )
   }
 }
-
 
 
 
@@ -138,7 +100,6 @@ async function fetchCurrentZoom(page) {
   const zoom = elementParams[0].split('--zoom-').pop()
   return zoom
 }
-
 
 
 module.exports.makeTile = makeTile

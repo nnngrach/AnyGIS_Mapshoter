@@ -4,8 +4,6 @@ function getAllCoordinates( x, y, z ) {
   const bottomRight = getCoordinates( x+1, y+1, z )
   const center = getCenter( topLeft.lat, bottomRight.lat, topLeft.lon, bottomRight.lon )
   const bBox = { latMin: bottomRight.lat, lonMin:  topLeft.lon, latMax:  topLeft.lat, lonMax:  bottomRight.lon }
-  //const bBox = `(${bottomRight.lat}, ${topLeft.lon}, ${topLeft.lat}, ${bottomRight.lon})`;
-
   return { bBox: bBox, center: center }
 }
 

@@ -2,4 +2,4 @@ build:
   docker:
     web: Dockerfile
 run:
-  web: node Controller/Main.js
+  web: node --experimental-worker App/Main.js
