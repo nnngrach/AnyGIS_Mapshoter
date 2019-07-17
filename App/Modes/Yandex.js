@@ -22,6 +22,9 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
     case 'satellite':
       displayMode = '?l=sat&ll='
       break
+    case 'hybrid':
+      displayMode = '?l=sat%2Cskl&ll='
+      break
     case 'traffic':
       displayMode = '?l=trf%2Ctrfe&ll='
       break
@@ -63,7 +66,7 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
 
 async function clickIfExist(selector, page) {
   try {
-    await page.waitForSelector(selector, { timeout: 100 })
+    await page.waitForSelector(selector, { timeout: 250 })
     await page.click(selector)
   } catch {}
 }
