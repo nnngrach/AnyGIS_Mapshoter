@@ -10,9 +10,13 @@ https://anygis.herokuapp.com/mapshoter/{mode}/{x}/{y}/{z}/{crossZoom}?script={sc
 ```
 
 `x, y, z` - Coordinates of loading tile.
+
 `mode` - Name of site with online map viewer. Can be: overpass, waze, yandex, nakarte.
-`crossZoom` - The zoom level below which the standard OpenStreetMap map will be displayed.
+
+`crossZoom` - The zoom level below which the standard OpenStreetMap map will be
+ displayed.
 `script` - Clarifying information used in the URL. Can't be empty.
+
 
 Example:
 ```
@@ -23,13 +27,15 @@ https://anygis.herokuapp.com/mapshoter/waze/9900/5133/14/10?script=noscript
 
 ### OverpassTurbo converter to PNG tiles
 
-This script can be used for watching OverpassTurbo map from your navigator app. To do this your script shall look like this example. Especially first string with `bbox`.
+This script can be used for watching OverpassTurbo map from navigator app of your smartphone. To do this your script shall look like this example. Especially for first string with `bbox`.
 
 ```
 [bbox:{{bbox}}];
 (
-  //your code here
-  way[highway];
+
+    // your code here:
+    way[highway][surface=fine_gravel];
+
 );
 out body;>;out skel qt;
 ```
