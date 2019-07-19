@@ -50,8 +50,14 @@ Next I just copied `ID` of my script (s/KEy) to the `script` paramater of this U
 ```
 https://anygis.herokuapp.com/mapshoter/overpass/{x}/{y}/{z}/15?script=s/KEy
 ```
-
 [Viewer of converted tiles][2]
+
+Important: Turn off checkbox "include current map state"
+
+![](https://raw.githubusercontent.com/nnngrach/AnyGIS_Mapshoter/master/views/img/overpass_sharing.png)
+
+
+
 
 
 
