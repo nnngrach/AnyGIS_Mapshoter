@@ -7,7 +7,6 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
 	const page = await browser.newPage()
   await page.setViewport( { width: 800, height: 450 } )
   await page.setUserAgent(userAgent)
-  await page.waitFor( delayTime )
   //await page.setExtraHTTPHeaders({'referer': 'https://yandex.ru/'})
 
   const coordinates = geoTools.getAllCoordinates( x, y, z )
@@ -37,8 +36,10 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
 
 
   try {
+    //await page.waitFor( delayTime )
     await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 20000} )
   	//await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 30000, referer: 'https://yandex.ru/'} )
+
 
     const busBannerCloseButton = 'body > div.popup._type_tooltip._position_bottom > div.popup__content > div > div.close-button._color_white'
     const cookieBannerCloseButton = 'body > div:nth-child(10) > div > div.lg-cc__controls > button.lg-cc__button.lg-cc__button_type_action'
@@ -54,6 +55,7 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
     //const screenshot = await page.screenshot()
     const screenshot = await page.screenshot( cropOptions )
 
+
     await page.close()
   	return screenshot
 
@@ -67,6 +69,7 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
 async function clickIfExist(selector, page) {
   try {
     await page.waitForSelector(selector, { timeout: 250 })
+    //await page.waitFor(100) //???
     await page.click(selector)
   } catch {}
 }

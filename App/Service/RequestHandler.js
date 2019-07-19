@@ -18,7 +18,7 @@ async function makeRequest( param, browserPromise ) {
 
   // Если одновнеменно послать сразу много запросов, то могут забанить.
   // Сделаем, чтобы они стартовали немного в разное время.
-  const delayTime = randomInt(0, 1000)
+  const delayTime = randomInt(0, 500)
 
   // Делать все новые и новые попытки, пока тайл не загрузится
   const maxTryCount = 1 // Нет, не делать
