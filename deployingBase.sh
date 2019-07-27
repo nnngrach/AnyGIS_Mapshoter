@@ -1,4 +1,3 @@
-i-mapshoter:anygis0000+9@gmail.com
 a-mapshoter:nnngrach+1@gmail.com
 b-mapshoter:nnngrach+2@gmail.com
 c-mapshoter:nnngrach+3@gmail.com
