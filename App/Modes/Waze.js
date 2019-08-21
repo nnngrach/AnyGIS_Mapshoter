@@ -6,11 +6,12 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
 
   // Константы
   const defaultZoomLevel = 15
-  const directionButonSelector = '#gtm-poi-card-get-directions > i'
-  const deletePinButonSelector = '#map > div.wm-cards > div.wm-card.is-routing > div > div.wm-routing__top > div.wm-routing__search > div > div.wm-route-search__to > div > div.wm-search__clear-icon > div'
-  const searchFieldXPath = '//*[@id="map"]/div[2]/div[2]/div[1]/div/div/input'
+  const searchFieldXPath = '//*[@id="map"]/div[1]/div[1]/div/input'
   const zoomPlusXPath = '//*[@id="map"]/div[2]/div[2]/div[4]/div[1]/a[1]'
   const zoomMinusXPath = '//*[@id="map"]/div[2]/div[2]/div[4]/div[1]/a[2]'
+  const directionButonXPath = '//*[@id="gtm-poi-card-get-directions"]'
+  const deletePinButonXPatch = '//*[@id="map"]/div[1]/div/div/div[1]/div[2]/div/div[4]/div/div[4]'
+
 
   // Рассчитать координаты краев и центра области для загрузки (тайла)
   const coordinates = geoTools.getAllCoordinates( x, y, z )
@@ -30,28 +31,37 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
     const pageUrl = 'https://www.waze.com/en/livemap?utm_campaign=waze_website'
     await page.goto( pageUrl, { waitUntil: 'networkidle2', timeout: 10000} )
 
-    // Навести карту на центр тайла
-    await click(searchFieldXPath, page)
+    // Кликнуть на поле поиска, чтобы в нем появился курсор
+    await click( searchFieldXPath, page )
+  
+    // Напечатать в поле поиска координаты центра тайла
     await page.keyboard.type( centerCoordinates )
-    page.keyboard.press('Enter');
+  
+    // Нажать Enter для начала поиска
+    page.keyboard.press( 'Enter' );
+
+    // Подождать 500 милисекунд для обновления страницы
     await page.waitFor( 500 )
 
-    // Подогнать масштаб
-    while(z > await fetchCurrentZoom(page)) {
-      await click(zoomPlusXPath, page)
-      await page.waitFor( 300 )
-    }
-
-    while(z < await fetchCurrentZoom(page)) {
-      await click(zoomMinusXPath, page)
-      await page.waitFor( 300 )
-    }
-
     // Удалить появившийся по центру экрана маркер
-    await page.click ( directionButonSelector )
+    // Для этого нужно закрыть меню поиска
+    await click( directionButonXPath, page )
     await page.waitFor( 100 )
-    await page.click ( deletePinButonSelector )
+
+    await click( deletePinButonXPatch, page )
     await page.waitFor( 100 )
+
+    // Кликать на кнопки увеличения или уменьшения
+    // пока текущий зум не станет соответствовать требуемому
+    while( z > await fetchCurrentZoom( page )) {
+      await click( zoomPlusXPath, page )
+      await page.waitFor( 300 )
+    }
+
+    while( z < await fetchCurrentZoom( page )) {
+      await click( zoomMinusXPath, page )
+      await page.waitFor( 300 )
+    }
 
     // Сделать кадрированный скриншот
     const cropOptions = {
