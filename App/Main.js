@@ -1,5 +1,6 @@
 const express = require( 'express' )
 const requestHandler = require( './Service/RequestHandler' )
+const stravaAuther = require( './StravaAuther/StravaAuther' )
 
 // Настроить многопоточного режима
 // Памяти Heroku хватит примерно на запуск трех браузеров
@@ -23,12 +24,24 @@ app.listen( PORT, () => {
 
 app.get( '/', async ( req, res, next ) => {
   res.writeHead( 200, {'Content-Type': 'text/plain'})
-  res.end( 'AnyGIS Mapshoter. Load vector online-map. Take screenshot. Return PNG tile.' )
+  res.end( 'AnyGIS Mapshooter. Load vector online-map. Take screenshot. Return PNG tile.' )
 })
 
 
 
-// Основной метод
+// Дополнение: пройти авторизацию на Strava и получить cookie
+app.get( '/StravaAuth/:login/:password/', async ( req, res, next ) => {
+  const login = req.params.login
+  const password = req.params.password
+  if ( !login ) return next( error( 400, 'No login paramerer' ) )
+  if ( !password ) return next( error( 400, 'No password paramerer' ) )
+
+  const authedCookies = await stravaAuther.getCookies( login, password)
+  res.json(authedCookies);
+})
+
+
+// Основной метод Mapshooter
 app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
 
   const x = req.params.x
