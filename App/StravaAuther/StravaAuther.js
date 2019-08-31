@@ -20,6 +20,8 @@ async function getCookies( login, password) {
 
   // Извлекаем _strava4_session cookie
   const sessionFourCookie = await page1.cookies()
+  //console.log(sessionFourCookie)
+  //console.log("================================")
 
   // Авторизация на heatmap-external-a.strava.com/auth
   const page2 = await browser.newPage()
@@ -28,7 +30,9 @@ async function getCookies( login, password) {
 
   // Извлекаем дополненные CloudFront cookies
   const cloudfontCookie = await page2.cookies()
+  //console.log(cloudfontCookie)
 
+  await browser.close()
   return cloudfontCookie
 }
 
