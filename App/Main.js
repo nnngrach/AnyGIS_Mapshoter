@@ -55,8 +55,8 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
 
 
   // Отсеиваем слишком мелкие уровни зума
-  if ( z < minZ) return redirectToDefaultMap(x,y,z,res)
-  if ( !bigTilesHandler.isZoomCorrect( z )) return redirectToDefaultMap(x,y,z,res)
+  if ( !bigTilesHandler.isZoomCorrect(z)) return redirectToDefaultMap(x,y,z,mode,res)
+  if ( parseInt(z) < parseInt(minZ) ) return redirectToDefaultMap(x,y,z,mode,res)
 
   // Получаем имя супер-тайла для сохранения в очередь
   const bigTileName = bigTilesHandler.getBigTileQueueName(x, y, z, mode, scriptName)
@@ -67,7 +67,8 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
   }
 
   // ждать, пока не скачается супер-тайл
-  await waitForSuperTileInCache(bigTileName)
+  const status = await waitForSuperTileInCache(bigTileName)
+  if (!status.isDone) return next( error( 400, 'Timeout for caching' ) )
 
   // если скачалось, то вернуть пользователю сохраненный и обрезанный мини-тайл
   const cacheTileName = bigTilesHandler.getBigTileCacheName(bigTileName, x, y)
@@ -88,9 +89,15 @@ function showTile(tile, res) {
   res.end( imageBuffer )
 }
 
-function redirectToDefaultMap(x, y, z, res) {
-  const defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
-  return res.redirect(defaultUrl)
+
+function redirectToDefaultMap(x, y, z, mode, res) {
+  const defaultUrls = {
+    "nakarte" : `http://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+    "overpass" : `http://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+    "waze" : `https://worldtiles1.waze.com/tiles/${z}/${x}/${y}.png`,
+    "yandex" : `http://tiles.maps.sputnik.ru/tiles/kmt2/${z}/${x}/${y}.png`
+  }
+  return res.redirect(defaultUrls[mode])
 }
 
 
@@ -112,6 +119,7 @@ async function downloadBigTileToCache(x, y, z, minZ, mode, scriptName, bigTileNa
     await cropAndCache(bigTileImage, bigTileName)
     queue.setTaskStatus(bigTileName, true)
   } else {
+    console.log(bigTileImage.value)
     return showErrorMessage(bigTileImage.value)
   }
 }
@@ -126,7 +134,6 @@ async function takeBigTileImage(x, y, z, minZ, mode, scriptName, res, next) {
       patchToModule = '../Modes/Overpass'
       params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}
       jsonResult = await workersPool.exec(params)
-      //sendResponse(jsonResult, res)
       return jsonResult
       break
 
@@ -134,7 +141,6 @@ async function takeBigTileImage(x, y, z, minZ, mode, scriptName, res, next) {
       patchToModule = '../Modes/Nakarte'
       params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}
       jsonResult = await workersPool.exec(params)
-      //sendResponse(jsonResult, res)
       return jsonResult
       break
 
@@ -142,7 +148,7 @@ async function takeBigTileImage(x, y, z, minZ, mode, scriptName, res, next) {
       patchToModule = '../Modes/Waze'
       params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}
       jsonResult = await workersPool.exec(params)
-      //sendResponse(jsonResult, res)
+      //return showTile(jsonResult.value, res)
       return jsonResult
       break
 
@@ -150,7 +156,6 @@ async function takeBigTileImage(x, y, z, minZ, mode, scriptName, res, next) {
       patchToModule = '../Modes/Yandex'
       params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}
       jsonResult = await workersPool.exec(params)
-      //sendResponse(jsonResult, res)
       return jsonResult
       break
 
@@ -177,20 +182,27 @@ async function cropAndCache(bigTileImage, bigTileName) {
 }
 
 
-// проверять каждые 100мс и ждать, не появилась ли отметка, что супер-тайл скачан
+// проверять каждые 250мс и ждать, не появилась ли отметка, что супер-тайл скачан
 async function waitForSuperTileInCache(bigTileName) {
 
-  while (true) {
-    if ( queue.checkTaskStatus(bigTileName)) { break }
+  const timeout = 60000
+  const waitingInterval = 250
+  const iterationsCount = timeout / waitingInterval
+
+  for (var i = 0; i < iterationsCount; i++) {
+
+    if ( queue.checkTaskStatus(bigTileName)) { return {isDone: true} }
 
     var promise = new Promise(function(resolve, reject) {
       setTimeout(function() {
         resolve('waiting done')
-      }, 100)
+      }, waitingInterval)
     })
 
     await promise
   }
+
+  return {isDone: false}
 }
 
 

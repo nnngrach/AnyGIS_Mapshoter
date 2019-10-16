@@ -4,6 +4,9 @@ const geoTools = require( '../Service/GeoTools' )
 
 async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromise) {
 
+  const hideMenuXPathSelector = "//*[@id=\"map\"]/div[2]/div[2]/div/div[1]/div/div[1]"
+
+
   const browser = await browserPromise
 	const page = await browser.newPage()
   await page.setViewport( { width: 1400, height: 1400 } )
@@ -14,8 +17,12 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
   const centerCoordinates = `${z}/${coordinates.center.lat}/${coordinates.center.lon}&l=`
   const pageUrl = 'https://nakarte.me/#m=' + centerCoordinates + scriptName
 
+
+
   try {
   	await page.goto( pageUrl, { waitUntil: 'networkidle0', timeout: 30000} )
+
+    await click( hideMenuXPathSelector, page )
 
     const cropOptions = {
       fullPage: false,
@@ -34,5 +41,16 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
   }
 }
 
+
+async function click( xPathSelector, page ) {
+  await page.waitForXPath(xPathSelector)
+  const foundedElements = await page.$x(xPathSelector)
+
+  if (foundedElements.length > 0) {
+    await foundedElements[0].click()
+  } else {
+    throw new Error("XPath element not found: ", xPathSelector)
+  }
+}
 
 module.exports.makeTile = makeTile

@@ -1,7 +1,7 @@
 async function makeRequest( param, browserPromise ) {
 
   const puppeteerScript = require( param.patchToModule )
-  const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
+  const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
 
   const startTime = new Date().getTime()
   //console.log(startTime / 1000, ' - R app get', param.z, param.x, param.y)
@@ -30,7 +30,7 @@ async function makeRequest( param, browserPromise ) {
       isSucces = true
 
     } catch ( error ) {
-      //console.log( new Date().getTime() / 1000, ' -- Error',  param.z, param.x, param.y)
+      console.log( new Date().getTime() / 1000, ' -- Error',  param.z, param.x, param.y)
       console.log( error )
       errorMessage = error.message
     }

@@ -1,7 +1,7 @@
 
 // Первый уровень зума, где есть 4х4 тайлов
 function isZoomCorrect(zoomLevel) {
-  return zoomLevel >= 2
+  return parseInt(zoomLevel) >= 2
 }
 
 // Номер супер-тайла
