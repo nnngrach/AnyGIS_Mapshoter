@@ -6,15 +6,6 @@ async function makeRequest( param, browserPromise ) {
   const startTime = new Date().getTime()
   console.log(startTime / 1000, ' - R app get', param.z, param.x, param.y)
 
-  // Чтобы не перегружать Overpass не будем делать запросы для слишком больших территорий.
-  // Просто покажем пустую карту для этих масштабов.
-  if ( Number( param.z ) < param.minZ ) {
-    const defaultUrl = `http://tile.openstreetmap.org/${param.z}/${param.x}/${param.y}.png`
-    return {status: "Redirect", value: defaultUrl}
-
-  } else if ( Number( param.z ) > param.maxZ )  {
-    return {status: "Error", value: 'This zoom level not exist'}
-  }
 
   // Если одновнеменно послать сразу много запросов, то могут забанить.
   // Сделаем, чтобы они стартовали немного в разное время.

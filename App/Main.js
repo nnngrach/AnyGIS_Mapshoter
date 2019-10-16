@@ -28,7 +28,7 @@ app.listen( PORT, () => {
 
 
 
-
+// Стартовое сообщение (index)
 app.get( '/', async ( req, res, next ) => {
   res.writeHead( 200, {'Content-Type': 'text/plain'})
   res.end( 'AnyGIS Mapshooter. Load vector online-map. Take screenshot. Return PNG tile.' )
@@ -38,7 +38,6 @@ app.get( '/', async ( req, res, next ) => {
 
 
 // Основной метод Mapshooter
-
 app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
 
   const x = req.params.x
@@ -48,86 +47,108 @@ app.get( '/:mode/:x/:y/:z/:minZ', async ( req, res, next ) => {
   const mode = req.params.mode
   const scriptName = req.query.script
 
-  var moduleName, defaultUrl, maxZ, params, jsonResult, imageBuffer
-
   if ( !isInt( x )) return next( error( 400, 'X must must be Intager' ))
   if ( !isInt( y )) return next( error( 400, 'Y must must be Intager' ))
   if ( !isInt( z )) return next( error( 400, 'Z must must be Intager' ))
   if ( !isInt( minZ )) return next( error( 400, 'MinimalZoom must must be Intager' ))
   if ( !scriptName ) return next( error( 400, 'No script paramerer' ) )
-  if ( !bigTilesHandler.isZoomCorrect( z )) return next( error( 400, 'Zoom level too small' ))
 
 
+  // Отсеиваем слишком мелкие уровни зума
+  if ( z < minZ) return redirectToDefaultMap(x,y,z,res)
+  if ( !bigTilesHandler.isZoomCorrect( z )) return redirectToDefaultMap(x,y,z,res)
+
+  // Получаем имя супер-тайла для сохранения в очередь
   const bigTileName = bigTilesHandler.getBigTileQueueName(x, y, z, mode, scriptName)
 
   // если супер-тайл еще не загружается, то поставить его на закачку.
   if (!queue.isTaskInQueue(bigTileName)) {
-    queue.addTask(bigTileName)
-    const topLeftTile = bigTilesHandler.getTopLeftTileNumbers(x, y)
-    const bigTileImage = await downloadBigTile(topLeftTile.x, topLeftTile.y, z, minZ, mode, scriptName, res, next)
-    await cropAndCache(bigTileImage, bigTileName)
-    queue.setTaskStatus(bigTileName, true)
+    downloadBigTileToCache(x, y, z, minZ, mode, scriptName, bigTileName, res, next)
   }
 
-  // проверять каждые 100мс и ждать, пока не скачается супер-тайл
-  while (true) {
-    if ( queue.checkTaskStatus(bigTileName)) { break }
-
-    var promise = new Promise(function(resolve, reject) {
-      setTimeout(function() {
-        resolve('waiting done')
-      }, 100)
-    })
-
-    await promise
-  }
+  // ждать, пока не скачается супер-тайл
+  await waitForSuperTileInCache(bigTileName)
 
   // если скачалось, то вернуть пользователю сохраненный и обрезанный мини-тайл
   const cacheTileName = bigTilesHandler.getBigTileCacheName(bigTileName, x, y)
   const cachedSmallTile = await cache.load(cacheTileName)
-  sendResponse( {status: "Screenshot", value: cachedSmallTile.data}, res )
+  return showTile(cachedSmallTile.data, res)
 })
 
 
 
+// Варианты ответа пользователю
 
-// Выбираем режим обработки карты
-async function downloadBigTile(x, y, z, minZ, mode, scriptName, res, next) {
+function showTile(tile, res) {
+  imageBuffer = Buffer.from( tile, 'base64' )
+  res.writeHead( 200, {
+    'Content-Type': 'image/png',
+    'Content-Length': imageBuffer.length
+  })
+  res.end( imageBuffer )
+}
+
+function redirectToDefaultMap(x, y, z, res) {
+  const defaultUrl = `http://tile.openstreetmap.org/${z}/${x}/${y}.png`
+  return res.redirect(defaultUrl)
+}
+
+
+function showErrorMessage(errorMessage, res) {
+  res.writeHead( 200, {'Content-Type': 'text/plain'})
+  res.end( errorMessage)
+}
+
+
+
+// Скачивание от обработка супер-тайла
+async function downloadBigTileToCache(x, y, z, minZ, mode, scriptName, bigTileName, res, next) {
+
+  queue.addTask(bigTileName)
+  const topLeftTile = bigTilesHandler.getTopLeftTileNumbers(x, y)
+  const bigTileImage = await takeBigTileImage(topLeftTile.x, topLeftTile.y, z, minZ, mode, scriptName, res, next)
+
+  if (bigTileImage.status != "Error") {
+    await cropAndCache(bigTileImage, bigTileName)
+    queue.setTaskStatus(bigTileName, true)
+  } else {
+    return showErrorMessage(bigTileImage.value)
+  }
+}
+
+
+// Скачивание супер-тайла в зависимости от типа карты
+async function takeBigTileImage(x, y, z, minZ, mode, scriptName, res, next) {
 
   switch ( mode ) {
 
     case 'overpass':
-      maxZ = 18
       patchToModule = '../Modes/Overpass'
-      params = { x: x, y: y, z: z, minZ: minZ, maxZ: maxZ, scriptName: scriptName, patchToModule: patchToModule}
+      params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}
       jsonResult = await workersPool.exec(params)
       //sendResponse(jsonResult, res)
       return jsonResult
       break
 
     case 'nakarte':
-      console.log("case", x,y,z)
-      maxZ = 18
       patchToModule = '../Modes/Nakarte'
-      params = { x: x, y: y, z: z, minZ: minZ, maxZ: maxZ, scriptName: scriptName, patchToModule: patchToModule}
+      params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}
       jsonResult = await workersPool.exec(params)
       //sendResponse(jsonResult, res)
       return jsonResult
       break
 
     case 'waze':
-      maxZ = 18
       patchToModule = '../Modes/Waze'
-      params = { x: x, y: y, z: z, minZ: minZ, maxZ: maxZ, scriptName: scriptName, patchToModule: patchToModule}
+      params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}
       jsonResult = await workersPool.exec(params)
       //sendResponse(jsonResult, res)
       return jsonResult
       break
 
     case 'yandex':
-      maxZ = 18
       patchToModule = '../Modes/Yandex'
-      params = { x: x, y: y, z: z, minZ: minZ, maxZ: maxZ, scriptName: scriptName, patchToModule: patchToModule}
+      params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}
       jsonResult = await workersPool.exec(params)
       //sendResponse(jsonResult, res)
       return jsonResult
@@ -156,39 +177,27 @@ async function cropAndCache(bigTileImage, bigTileName) {
 }
 
 
+// проверять каждые 100мс и ждать, не появилась ли отметка, что супер-тайл скачан
+async function waitForSuperTileInCache(bigTileName) {
+
+  while (true) {
+    if ( queue.checkTaskStatus(bigTileName)) { break }
+
+    var promise = new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        resolve('waiting done')
+      }, 100)
+    })
+
+    await promise
+  }
+}
+
 
 
 
 
 // Вспомогательные функции
-
-function sendResponse(jsonResult, res) {
-    switch ( jsonResult.status ) {
-
-      case 'Screenshot':
-        imageBuffer = Buffer.from( jsonResult.value, 'base64' )
-        res.writeHead( 200, {
-          'Content-Type': 'image/png',
-          'Content-Length': imageBuffer.length
-        })
-        res.end( imageBuffer )
-        break
-
-      case 'Redirect':
-        res.redirect(jsonResult.value)
-        break
-
-      case 'Error':
-        res.writeHead( 200, {'Content-Type': 'text/plain'})
-        res.end( jsonResult.value )
-        break
-
-      default:
-        next( error( 501, 'Unknown jsonResult status' ) )
-        break
-      }
-}
-
 
 function isInt( value ) {
   var x = parseFloat( value )

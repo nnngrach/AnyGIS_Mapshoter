@@ -15,7 +15,6 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
 
   // Рассчитать координаты краев и центра области для загрузки (тайла)
   const coordinates = geoTools.getAllBigTileCoordinates( x, y, z )
-  //const coordinates = geoTools.getAllBigTileCoordinates( x, y, z )
   const centerCoordinates = `lat=${coordinates.center.lat} lng=${coordinates.center.lon}`
 
   // Запустить и настроить страницу браузера
