@@ -10,17 +10,18 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
   const zoomPlusXPath = '//*[@id="map"]/div[2]/div[2]/div[4]/div[1]/a[1]'
   const zoomMinusXPath = '//*[@id="map"]/div[2]/div[2]/div[4]/div[1]/a[2]'
   const directionButonXPath = '//*[@id="gtm-poi-card-get-directions"]'
-  const deletePinButonXPatch = '//*[@id="map"]/div[1]/div/div/div[1]/div[2]/div/div[4]/div/div[4]'
+  const deletePinButonXPatch = '//*[@id="map"]/div[1]/div/div/div/div[2]/div[2]/div/div[4]'
 
 
   // Рассчитать координаты краев и центра области для загрузки (тайла)
-  const coordinates = geoTools.getAllCoordinates( x, y, z )
+  const coordinates = geoTools.getAllBigTileCoordinates( x, y, z )
+  //const coordinates = geoTools.getAllBigTileCoordinates( x, y, z )
   const centerCoordinates = `lat=${coordinates.center.lat} lng=${coordinates.center.lon}`
 
   // Запустить и настроить страницу браузера
   const browser = await browserPromise
   const page = await browser.newPage()
-  await page.setViewport( { width: 1100, height: 450 } )
+  await page.setViewport( { width: 1800, height: 1300 } )
   await page.setUserAgent(userAgent);
 
 
@@ -33,10 +34,10 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
 
     // Кликнуть на поле поиска, чтобы в нем появился курсор
     await click( searchFieldXPath, page )
-  
+
     // Напечатать в поле поиска координаты центра тайла
     await page.keyboard.type( centerCoordinates )
-  
+
     // Нажать Enter для начала поиска
     page.keyboard.press( 'Enter' );
 
@@ -63,10 +64,12 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
       await page.waitFor( 300 )
     }
 
+    await page.waitFor( 300 )
+
     // Сделать кадрированный скриншот
     const cropOptions = {
       fullPage: false,
-      clip: {x: 422, y: 97, width: 256, height: 256}
+      clip: {x: 414, y: 135, width: 1024, height: 1024}
     }
 
     //const screenshot = await page.screenshot()
