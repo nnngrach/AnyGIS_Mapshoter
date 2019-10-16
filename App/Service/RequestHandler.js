@@ -4,7 +4,7 @@ async function makeRequest( param, browserPromise ) {
   const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
 
   const startTime = new Date().getTime()
-  console.log(startTime / 1000, ' - R app get', param.z, param.x, param.y)
+  //console.log(startTime / 1000, ' - R app get', param.z, param.x, param.y)
 
 
   // Если одновнеменно послать сразу много запросов, то могут забанить.
@@ -30,7 +30,7 @@ async function makeRequest( param, browserPromise ) {
       isSucces = true
 
     } catch ( error ) {
-      console.log( new Date().getTime() / 1000, ' -- Error',  param.z, param.x, param.y)
+      //console.log( new Date().getTime() / 1000, ' -- Error',  param.z, param.x, param.y)
       console.log( error )
       errorMessage = error.message
     }
@@ -41,12 +41,12 @@ async function makeRequest( param, browserPromise ) {
   const endTime = new Date().getTime() - startTime
 
   if (isSucces) {
-      console.log(new Date().getTime() / 1000, endTime, ' ---- R app res', param.z, param.x, param.y)
+      //console.log(new Date().getTime() / 1000, endTime, ' ---- R app res', param.z, param.x, param.y)
       return {status: "Screenshot", value: screenshot}
   } else {
-      console.log(new Date().getTime() / 1000, endTime, ' ---- FAIL', param.z, param.x, param.y)
-      return {status: "Error", value: errorMessage}
+      //console.log(new Date().getTime() / 1000, endTime, ' ---- FAIL', param.z, param.x, param.y)
       //return {status: "Error", value: 'Fetch tile count limit'}
+      return {status: "Error", value: errorMessage}
   }
 }
 
