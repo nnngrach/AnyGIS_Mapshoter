@@ -7,16 +7,17 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
   // Селекторы
   const runButtonSelector = '#navs > div > div.buttons > div:nth-child(1) > a:nth-child(1)'
   const codeEditorSelector = '#editor > div.CodeMirror.CodeMirror-wrap > div:nth-child(1) > textarea'
-
+  
   // Рассчитать координаты краев и центра области для загрузки (тайла)
-  const coordinates = geoTools.getAllCoordinates( x, y, z )
+  const coordinates = geoTools.getAllBigTileCoordinates( x, y, z )
   const bBox = `[bbox:${coordinates.bBox.latMin}, ${coordinates.bBox.lonMin}, ${coordinates.bBox.latMax}, ${coordinates.bBox.lonMax}];`
   const centerCoordinates = `${coordinates.center.lat};${coordinates.center.lon};${z}`
 
-  // Запустить и настроить страницк браузера
+
+  // Запустить и настроить страницу браузера
   const browser = await browserPromise
   const page = await browser.newPage()
-  await page.setViewport( { width: 850, height: 450 } )
+  await page.setViewport( { width: 2100, height: 1200 } )
   await page.setUserAgent(userAgent)
 
 
@@ -44,13 +45,15 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
     await page.waitForFunction(() => !document.querySelector('body > div.modal > div > ul > li:nth-child(1)'), {polling: 'mutation'});
     await page.waitFor( 1000 )
 
+
+
     // Сделать кадрированный скриншот
     const cropOptions = {
       fullPage: false,
-      clip: {x: 489, y: 123, width: 256, height: 256}
+      clip: {x: 1011, y: 113, width: 1024, height: 1024}
     }
 
-    // const screenshot = await page.screenshot()
+    //const screenshot = await page.screenshot()
     const screenshot = await page.screenshot( cropOptions )
 
     // Завершение работы
@@ -63,6 +66,8 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
     throw new Error( error.message )
   }
 }
+
+
 
 
 module.exports.makeTile = makeTile

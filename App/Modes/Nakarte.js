@@ -10,8 +10,7 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
   await page.setUserAgent(userAgent)
   //await page.waitFor( delayTime )
 
-  //const coordinates = geoTools.getAllCoordinates( x, y, z )
-  const coordinates = geoTools.getAllCoordinates( x+2, y+2, z )
+  const coordinates = geoTools.getAllBigTileCoordinates( x, y, z )
   const centerCoordinates = `${z}/${coordinates.center.lat}/${coordinates.center.lon}&l=`
   const pageUrl = 'https://nakarte.me/#m=' + centerCoordinates + scriptName
 
@@ -20,7 +19,7 @@ async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromi
 
     const cropOptions = {
       fullPage: false,
-      clip: {x: 60, y: 60, width: 1024, height: 1024}
+      clip: {x: 188, y: 188, width: 1024, height: 1024}
     }
 
     //const screenshot = await page.screenshot()

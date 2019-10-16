@@ -22,6 +22,7 @@ function getRelativeTileNublers(x, y) {
 function getTopLeftTileNumbers(x, y) {
   const cleanX = x - (x%4)
   const cleanY = y - (y%4)
+  //console.log(cleanX, cleanY)
   return {x: cleanX, y: cleanY}
 }
 
