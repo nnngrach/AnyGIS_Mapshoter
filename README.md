@@ -6,7 +6,7 @@ Load vector online-map. Take screenshot. Return PNG tile.
 ### API
 
 ```
-https://anygis.herokuapp.com/mapshoter/{mode}/{x}/{y}/{z}/{crossZoom}?script={script}
+https://anygis.ru/api/v1/mapshoter/{mode}/{x}/{y}/{z}/{crossZoom}?script={script}
 ```
 
 `x, y, z` - Coordinates of loading tile.
@@ -21,7 +21,7 @@ https://anygis.herokuapp.com/mapshoter/{mode}/{x}/{y}/{z}/{crossZoom}?script={sc
 
 Here is example of filler URL:
 ```
-https://anygis.herokuapp.com/mapshoter/waze/9900/5133/14/10?script=noscript
+https://anygis.ru/api/v1/mapshoter/waze/9900/5133/14/10?script=noscript
 ```
 [Viewer of converted tiles][0]
 
