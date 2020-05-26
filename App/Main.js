@@ -137,6 +137,13 @@ async function takeBigTileImage(x, y, z, minZ, mode, scriptName, res, next) {
       return jsonResult
       break
 
+    case 'overpassTest':
+      patchToModule = '../Modes/OverpassAnygis'
+      params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}
+      jsonResult = await workersPool.exec(params)
+      return jsonResult
+      break
+
     case 'nakarte':
       patchToModule = '../Modes/Nakarte'
       params = { x: x, y: y, z: z, minZ: minZ, scriptName: scriptName, patchToModule: patchToModule}

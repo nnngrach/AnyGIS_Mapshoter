@@ -4,7 +4,7 @@ const geoTools = require( '../Service/GeoTools' )
 
 async function makeTile( x, y, z, scriptName, delayTime, userAgent, browserPromise) {
 
-  const hideMenuXPathSelector = "//*[@id=\"map\"]/div[2]/div[2]/div/div[1]/div/div[1]"
+  const hideMenuXPathSelector = "//*[@id=\"map\"]/div[2]/div[2]/div[2]/div[2]/div/div[1]/div/div[1]"
 
 
   const browser = await browserPromise
